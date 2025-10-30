@@ -47,8 +47,8 @@ const MessagesState = z.object({
 });
 
 async function addFiles(state) {
-  const result = await execa('git', ['add', '.']);
-  log.info(`Add files result: ${result.stdout ?? ''}`);
+  log.info(`Adding files`);
+  await execa('git', ['add', '.']);
   return {};
 }
 
