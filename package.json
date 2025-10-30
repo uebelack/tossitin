@@ -1,0 +1,13 @@
+{
+  "name": "tossitin",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@clack/prompts": "^0.11.0",
+    "@langchain/anthropic": "^0.3.33",
+    "@langchain/core": "^1.0.2",
+    "@langchain/langgraph": "^1.0.1",
+    "execa": "^9.6.0"
+  }
+}
