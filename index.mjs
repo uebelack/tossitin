@@ -1,5 +1,5 @@
 import { ChatAnthropic } from '@langchain/anthropic';
-import { execaCommand } from 'execa';
+import { execa, execaCommand } from 'execa';
 import { intro, outro, log } from '@clack/prompts';
 import { SystemMessage, HumanMessage } from '@langchain/core/messages';
 import { MessagesZodMeta } from '@langchain/langgraph';
@@ -22,9 +22,14 @@ const execute = tool(
   {
     name: 'execute',
     description: 'Execute a command line command',
-    schema: z.object({
-      command: z.string().describe('Command to execute'),
-    }),
+    schema: {
+      type: 'object',
+      properties: {
+        command: { type: 'string', description: 'Command to execute' },
+      },
+      required: ['command'],
+      additionalProperties: false,
+    },
   }
 );
 
@@ -37,7 +42,15 @@ const modelWithTools = model.bindTools(tools);
 
 const MessagesState = z.object({
   messages: z.array(z.any()).register(registry, MessagesZodMeta),
+  subject: z.string().optional(),
+  description: z.string().optional(),
 });
+
+async function addFiles(state) {
+  const result = await execa('git', ['add', '.']);
+  log.info(`Add files result: ${result.stdout ?? ''}`);
+  return {};
+}
 
 async function generateCommitMessage(state) {
   return {
@@ -45,8 +58,7 @@ async function generateCommitMessage(state) {
       new SystemMessage(
         `You are a helpful assistant that generates commit messages for a git repository. 
         Please use the tools to execute needed git commands to find the changes to be committed. 
-        You should then return a commit message that describes the changes in a way that is easy to understand.
-        Please use emojis to make the commit message more engaging.`
+        You should then return a commit message that describes the changes in a way that is easy to understand.`
       ),
       ...state.messages,
     ]),
@@ -74,24 +86,74 @@ async function shouldContinue(state) {
   const lastMessage = state.messages.at(-1);
   if (lastMessage == null || !isAIMessage(lastMessage)) return END;
 
-  // If the LLM makes a tool call, then perform an action
   if (lastMessage.tool_calls?.length) {
     return 'toolNode';
   }
 
-  // Otherwise, we stop (reply to the user)
-  return END;
+  return 'structureCommitMessage';
+}
+
+async function structureCommitMessage(state) {
+  const outputSchema = {
+    type: 'object',
+    properties: {
+      subject: {
+        type: 'string',
+        description: 'The subject of the commit message',
+      },
+      description: {
+        type: 'string',
+        description: 'The description of the commit message',
+      },
+    },
+    required: ['subject', 'description'],
+    additionalProperties: false,
+  };
+  const modelWithStructure = model.withStructuredOutput(outputSchema);
+
+  const result = await modelWithStructure.invoke([
+    new SystemMessage(
+      'You are a helpful assistant that structures a commit message for a git repository.'
+    ),
+    state.messages[state.messages.length - 1],
+  ]);
+
+  return {
+    subject: result.subject,
+    description: result.description,
+  };
+}
+
+async function commit(state) {
+  log.info(
+    `Committing with subject: ${state.subject} and description: ${state.description}`
+  );
+  const result = await execa('git', [
+    'commit',
+    '-m',
+    state.subject ?? '',
+    '-m',
+    state.description ?? '',
+  ]);
+  log.info(`Commit result: ${result.stdout ?? ''}`);
+  return {};
 }
 
 const graph = new StateGraph(MessagesState)
+  .addNode('addFiles', addFiles)
   .addNode('generateCommitMessage', generateCommitMessage)
   .addNode('toolNode', toolNode)
-  .addEdge(START, 'generateCommitMessage')
+  .addNode('structureCommitMessage', structureCommitMessage)
+  .addNode('commit', commit)
+  .addEdge(START, 'addFiles')
+  .addEdge('addFiles', 'generateCommitMessage')
   .addConditionalEdges('generateCommitMessage', shouldContinue, [
     'toolNode',
-    END,
+    'structureCommitMessage',
   ])
   .addEdge('toolNode', 'generateCommitMessage')
+  .addEdge('structureCommitMessage', 'commit')
+  .addEdge('commit', END)
   .compile();
 
 async function run() {
@@ -102,7 +164,6 @@ async function run() {
       ),
     ],
   });
-  console.log(result.messages.at(-1).content);
 }
 
 run();
