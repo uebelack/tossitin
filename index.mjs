@@ -46,6 +46,19 @@ const MessagesState = z.object({
   description: z.string().optional(),
 });
 
+async function checkNothingToCommit(state) {
+  const { stdout } = await execa('git', ['status', '--porcelain']);
+  if ((stdout ?? '').trim().length === 0) {
+    log.info('Nothing to commit. Exiting.');
+  }
+  return { ...state };
+}
+
+async function continueAfterCheck() {
+  const { stdout } = await execa('git', ['status', '--porcelain']);
+  return (stdout ?? '').trim().length === 0 ? END : 'generateCommitMessage';
+}
+
 async function addFiles(state) {
   log.info(`Adding files`);
   await execa('git', ['add', '.']);
@@ -58,7 +71,8 @@ async function generateCommitMessage(state) {
       new SystemMessage(
         `You are a helpful assistant that generates commit messages for a git repository. 
         Please use the tools to execute needed git commands to find the changes to be committed. 
-        You should then return a commit message that describes the changes in a way that is easy to understand.`
+        You should then return a commit message that describes the changes in a way that is easy to understand.
+        If nothing is changed, return "Nothing to commit".`
       ),
       ...state.messages,
     ]),
@@ -113,7 +127,7 @@ async function structureCommitMessage(state) {
 
   const result = await modelWithStructure.invoke([
     new SystemMessage(
-      'You are a helpful assistant that structures a commit message for a git repository.'
+      'You are a helpful assistant that structures a commit message for a git repository and adds an emoji in front of the subject.'
     ),
     state.messages[state.messages.length - 1],
   ]);
@@ -141,12 +155,17 @@ async function commit(state) {
 
 const graph = new StateGraph(MessagesState)
   .addNode('addFiles', addFiles)
+  .addNode('checkNothingToCommit', checkNothingToCommit)
   .addNode('generateCommitMessage', generateCommitMessage)
   .addNode('toolNode', toolNode)
   .addNode('structureCommitMessage', structureCommitMessage)
   .addNode('commit', commit)
   .addEdge(START, 'addFiles')
-  .addEdge('addFiles', 'generateCommitMessage')
+  .addEdge('addFiles', 'checkNothingToCommit')
+  .addConditionalEdges('checkNothingToCommit', continueAfterCheck, [
+    'generateCommitMessage',
+    END,
+  ])
   .addConditionalEdges('generateCommitMessage', shouldContinue, [
     'toolNode',
     'structureCommitMessage',
