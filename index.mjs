@@ -9,6 +9,8 @@ import { tool } from '@langchain/core/tools';
 import { isAIMessage, ToolMessage } from '@langchain/core/messages';
 import * as z from 'zod';
 
+intro("Let's toss it in! 🚀");
+
 const model = new ChatAnthropic({
   model: 'claude-sonnet-4-5',
 });
@@ -49,7 +51,7 @@ const MessagesState = z.object({
 async function checkNothingToCommit(state) {
   const { stdout } = await execa('git', ['status', '--porcelain']);
   if ((stdout ?? '').trim().length === 0) {
-    log.info('Nothing to commit. Exiting.');
+    outro('🛑 Nothing to commit. Exiting...');
   }
   return { ...state };
 }
@@ -153,6 +155,14 @@ async function commit(state) {
   return {};
 }
 
+async function push(state) {
+  log.info('Pushing');
+  const result = await execa('git', ['push']);
+  log.info(`Push result: ${result.stdout ?? ''}`);
+  outro('🎉 everything committed and pushed! 🎉');
+  return {};
+}
+
 const graph = new StateGraph(MessagesState)
   .addNode('addFiles', addFiles)
   .addNode('checkNothingToCommit', checkNothingToCommit)
@@ -160,6 +170,7 @@ const graph = new StateGraph(MessagesState)
   .addNode('toolNode', toolNode)
   .addNode('structureCommitMessage', structureCommitMessage)
   .addNode('commit', commit)
+  .addNode('push', push)
   .addEdge(START, 'addFiles')
   .addEdge('addFiles', 'checkNothingToCommit')
   .addConditionalEdges('checkNothingToCommit', continueAfterCheck, [
@@ -172,14 +183,15 @@ const graph = new StateGraph(MessagesState)
   ])
   .addEdge('toolNode', 'generateCommitMessage')
   .addEdge('structureCommitMessage', 'commit')
-  .addEdge('commit', END)
+  .addEdge('commit', 'push')
+  .addEdge('push', END)
   .compile();
 
 async function run() {
   const result = await graph.invoke({
     messages: [
       new HumanMessage(
-        'Create the initial commit message for the changes to be committed'
+        'Create the commit message for the changes to be committed'
       ),
     ],
   });
