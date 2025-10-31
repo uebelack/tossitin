@@ -13,7 +13,9 @@ import * as z from 'zod';
 // Check for ANTHROPIC_API_KEY
 if (!process.env.ANTHROPIC_API_KEY) {
   intro("Let's toss it in! 🚀");
-  outro('❌ ANTHROPIC_API_KEY environment variable is required. Please set it and try again.');
+  outro(
+    '❌ ANTHROPIC_API_KEY environment variable is required. Please set it and try again.'
+  );
   process.exit(1);
 }
 
@@ -35,7 +37,11 @@ const execute = tool(
       log.error(`Error: ${error.message}`);
 
       // Return error information to the LLM so it can try a different approach
-      const errorMessage = `Command failed with exit code ${error.exitCode}: ${command}\n\nError: ${error.stderr || error.message}\n\nTip: If using git commands with options and file paths, make sure options (like --stat) come before file paths (like index.mjs).`;
+      const errorMessage = `Command failed with exit code ${
+        error.exitCode
+      }: ${command}\n\nError: ${
+        error.stderr || error.message
+      }\n\nTip: If using git commands with options and file paths, make sure options (like --stat) come before file paths (like index.mjs).`;
       return errorMessage;
     }
   },
@@ -173,6 +179,13 @@ async function commit(state) {
   return {};
 }
 
+async function pull(state) {
+  log.info('Pulling');
+  const result = await execa('git', ['pull']);
+  log.info(`Pull result: ${result.stdout ?? ''}`);
+  return {};
+}
+
 async function push(state) {
   log.info('Pushing');
   const result = await execa('git', ['push']);
@@ -188,6 +201,7 @@ const graph = new StateGraph(MessagesState)
   .addNode('toolNode', toolNode)
   .addNode('structureCommitMessage', structureCommitMessage)
   .addNode('commit', commit)
+  .addNode('pull', pull)
   .addNode('push', push)
   .addEdge(START, 'addFiles')
   .addEdge('addFiles', 'checkNothingToCommit')
@@ -201,6 +215,8 @@ const graph = new StateGraph(MessagesState)
   ])
   .addEdge('toolNode', 'generateCommitMessage')
   .addEdge('structureCommitMessage', 'commit')
+  .addEdge('commit', 'pull')
+  .addEdge('pull', 'push')
   .addEdge('commit', 'push')
   .addEdge('push', END)
   .compile();
