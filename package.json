@@ -1,6 +1,6 @@
 {
   "name": "tossitin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generate git commit messages using a LangGraph workflow that inspects repo state and commits changes",
   "main": "index.mjs",
   "type": "module",

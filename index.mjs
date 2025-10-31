@@ -26,8 +26,18 @@ const model = new ChatAnthropic({
 const execute = tool(
   async ({ command }) => {
     log.info(`Executing command: ${command}`);
-    const { all } = await execaCommand(command, { shell: true, all: true });
-    return all;
+    try {
+      const { all } = await execaCommand(command, { shell: true, all: true });
+      return all;
+    } catch (error) {
+      // Log the error for debugging
+      log.error(`Command failed: ${command}`);
+      log.error(`Error: ${error.message}`);
+
+      // Return error information to the LLM so it can try a different approach
+      const errorMessage = `Command failed with exit code ${error.exitCode}: ${command}\n\nError: ${error.stderr || error.message}\n\nTip: If using git commands with options and file paths, make sure options (like --stat) come before file paths (like index.mjs).`;
+      return errorMessage;
+    }
   },
   {
     name: 'execute',
