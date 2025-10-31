@@ -10,6 +10,13 @@ import { tool } from '@langchain/core/tools';
 import { isAIMessage, ToolMessage } from '@langchain/core/messages';
 import * as z from 'zod';
 
+// Check for ANTHROPIC_API_KEY
+if (!process.env.ANTHROPIC_API_KEY) {
+  intro("Let's toss it in! 🚀");
+  outro('❌ ANTHROPIC_API_KEY environment variable is required. Please set it and try again.');
+  process.exit(1);
+}
+
 intro("Let's toss it in! 🚀");
 
 const model = new ChatAnthropic({
