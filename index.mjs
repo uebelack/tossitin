@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { ChatAnthropic } from '@langchain/anthropic';
 import { execa, execaCommand } from 'execa';
 import { intro, outro, log } from '@clack/prompts';

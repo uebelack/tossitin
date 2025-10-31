@@ -1,8 +1,30 @@
 {
   "name": "tossitin",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Generate git commit messages using a LangGraph workflow that inspects repo state and commits changes",
+  "main": "index.mjs",
+  "type": "module",
+  "bin": {
+    "tossitin": "./index.mjs"
+  },
+  "keywords": [
+    "git",
+    "commit",
+    "ai",
+    "langgraph",
+    "claude",
+    "anthropic",
+    "automation"
+  ],
+  "author": "David Übelacker",
   "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uebelack/tossitin"
+  },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
     "@langchain/anthropic": "^0.3.33",
