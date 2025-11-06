@@ -9,6 +9,7 @@ TossItIn is a LangGraph-powered tool that automatically generates git commit mes
 ## Development Commands
 
 ### Run the tool locally
+
 ```bash
 node index.mjs
 # or after npm link
@@ -16,6 +17,7 @@ tossitin
 ```
 
 ### Install dependencies
+
 ```bash
 yarn install
 # or
@@ -23,18 +25,22 @@ npm install
 ```
 
 ### Link for local development
+
 ```bash
 npm link
 # Now you can run 'tossitin' from anywhere
 ```
 
 ### Environment setup
+
 The tool requires the `ANTHROPIC_API_KEY` environment variable:
+
 ```bash
 export ANTHROPIC_API_KEY=your_key_here
 ```
 
 ### Publishing to npm
+
 ```bash
 # 1. Ensure you're logged in to npm
 npm login
@@ -54,6 +60,7 @@ npm install -g tossitin
 The entire application is contained in a single file (`index.mjs`) built with LangGraph. Understanding the flow is critical:
 
 ### LangGraph Workflow (State Graph)
+
 The workflow is a state machine with the following nodes and flow:
 
 1. **START → addFiles**: Stages all changes (`git add .`)
@@ -68,7 +75,9 @@ The workflow is a state machine with the following nodes and flow:
 10. **push → END**: Workflow complete
 
 ### State Schema
+
 The graph maintains state with these fields:
+
 - `messages`: Array of conversation messages (SystemMessage, HumanMessage, ToolMessage, AIMessage)
 - `subject`: (optional) Commit message subject line
 - `description`: (optional) Commit message body
@@ -78,19 +87,24 @@ The graph maintains state with these fields:
 **Tool Definition**: The `execute` tool allows the AI to run shell commands (primarily git commands like `git status` and `git diff --cached`) to inspect repository state.
 
 **Model Configuration**: Uses `claude-sonnet-4-5` with tool calling capabilities. Two model invocations:
+
 1. `modelWithTools`: For analyzing changes and generating commit message content
 2. `modelWithStructure`: For structuring output into subject/description format with structured output
 
 **Conditional Routing**:
+
 - `continueAfterCheck()`: Routes to END if nothing to commit, otherwise continues
 - `shouldContinue()`: Routes to toolNode if AI needs to execute tools, otherwise to structureCommitMessage
 
 ### Command Execution
+
 Uses `execa` for running git commands:
+
 - `execa('git', [args])`: For array-based arguments (safer, avoids pathspec errors)
 - `execaCommand(command)`: For tool execution from AI (shell: true, all: true for combined stdout/stderr)
 
 ### UI
+
 Uses `@clack/prompts` for terminal UI (intro, outro, log messages).
 
 ## Important Notes

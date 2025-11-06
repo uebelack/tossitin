@@ -21,15 +21,30 @@
   "engines": {
     "node": ">=22.0.0"
   },
+  "scripts": {
+    "format": "prettier --write ."
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/uebelack/tossitin"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
+    "@inquirer/prompts": "^7.9.0",
     "@langchain/anthropic": "^0.3.33",
     "@langchain/core": "^1.0.2",
     "@langchain/langgraph": "^1.0.1",
-    "execa": "^9.6.0"
+    "@langchain/ollama": "^1.0.0",
+    "execa": "^9.6.0",
+    "yargs": "^18.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@eslint/json": "^1.0.0",
+    "@eslint/markdown": "^7.5.1",
+    "eslint": "^10.0.0",
+    "globals": "^17.3.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   }
 }

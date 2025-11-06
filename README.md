@@ -15,16 +15,19 @@ Built with [LangGraph](https://langchain-ai.github.io/langgraph/) and [Claude](h
 ## Installation
 
 ### Global Installation (Recommended)
+
 ```bash
 npm install -g tossitin
 ```
 
 ### Run Without Installing
+
 ```bash
 npx tossitin
 ```
 
 ### Local Installation
+
 ```bash
 npm install tossitin
 ```
@@ -44,6 +47,7 @@ export ANTHROPIC_API_KEY=your_api_key_here
 ```
 
 To make it permanent, add to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.):
+
 ```bash
 echo 'export ANTHROPIC_API_KEY=your_api_key_here' >> ~/.zshrc
 ```
@@ -58,6 +62,7 @@ tossitin
 ```
 
 That's it! The tool will:
+
 1. Stage all changes (`git add .`)
 2. Analyze the changes using AI
 3. Generate a commit message with subject and description
@@ -97,6 +102,7 @@ The AI has access to a tool that can execute git commands, allowing it to inspec
 ## Development
 
 ### Clone and Install
+
 ```bash
 git clone https://github.com/uebelack/tossitin.git
 cd tossitin
@@ -104,12 +110,14 @@ npm install
 ```
 
 ### Link for Local Testing
+
 ```bash
 npm link
 tossitin  # Test from any directory
 ```
 
 ### Run Directly
+
 ```bash
 node index.mjs
 ```
@@ -119,11 +127,13 @@ node index.mjs
 **Nothing to commit**: Make sure you have uncommitted changes before running tossitin.
 
 **Missing API key**: Ensure `ANTHROPIC_API_KEY` is set in your environment:
+
 ```bash
 echo $ANTHROPIC_API_KEY  # Should display your key
 ```
 
 **Permission denied**: If you get a permission error, make sure index.mjs is executable:
+
 ```bash
 chmod +x index.mjs
 ```
@@ -131,6 +141,7 @@ chmod +x index.mjs
 ## Architecture
 
 Built with:
+
 - **[@langchain/langgraph](https://www.npmjs.com/package/@langchain/langgraph)**: State machine workflow orchestration
 - **[@langchain/anthropic](https://www.npmjs.com/package/@langchain/anthropic)**: Claude AI integration
 - **[@clack/prompts](https://www.npmjs.com/package/@clack/prompts)**: Beautiful terminal UI
