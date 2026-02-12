@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 import fs from "fs";
 import createBranchPrompt from "./prompts/createBranchPrompt.mjs";
 
