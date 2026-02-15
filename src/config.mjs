@@ -4,6 +4,7 @@ import addPrompt from "./prompts/addPrompt.mjs";
 import commitPrompt from "./prompts/commitPrompt.mjs";
 
 const config = {
+  force: false,
   protectedBranches: ["main", "master", "release/", "develop", "development"],
   prompts: {
     createBranch: createBranchPrompt,

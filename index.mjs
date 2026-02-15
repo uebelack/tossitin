@@ -4,11 +4,12 @@ import branch from "./src/branch.mjs";
 import add from "./src/add.mjs";
 import commit from "./src/commit.mjs";
 import push from "./src/push.mjs";
+import config from "./src/config.mjs";
 
 async function run() {
   intro("🪄 LET's ToSS IT iN! 💥");
 
-  const force = process.argv.includes("--force");
+  const force = process.argv.includes("--force") || config.force;
 
   await branch(force);
   await add(force);
