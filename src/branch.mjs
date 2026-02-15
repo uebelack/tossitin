@@ -27,8 +27,8 @@ async function createNewBranch(force) {
     });
   }
 
-  // const s = spinner();
-  // s.start("🧠 Thinking...");
+  const s = spinner();
+  s.start("🧠 Thinking...");
 
   const result = await llm().invoke([
     new SystemMessage(config.prompts.createBranch),
@@ -39,7 +39,7 @@ async function createNewBranch(force) {
 
   const newBranchName = extractResult(result);
 
-  // s.stop(`👌 Perfect branch name: ${newBranchName}`);
+  s.stop(`👌 Perfect branch name: ${newBranchName}`);
 
   if (force == true) {
     await execute(`git checkout -b ${newBranchName}`);

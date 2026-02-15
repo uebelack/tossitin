@@ -71,7 +71,7 @@ That's it! The tool will:
 
 ### Example Output
 
-```
+```bash
 ┌  Let's toss it in! 🚀
 │
 ◇  Adding files
