@@ -38,9 +38,12 @@ async function commit(force) {
     if (shouldCommit) {
       await execute(`git commit -m "${commitMessage}"`);
       log.info(`👌 Committed with message:\n\n${commitMessage}\n\n`);
+    } else {
+      process.exit(0);
     }
   } else {
     log.info("👌 No files to commit, exiting.");
+    process.exit(0);
   }
 }
 

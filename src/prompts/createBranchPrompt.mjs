@@ -12,6 +12,7 @@ Example branch names:
 - hotfix/URGENT-789-patch-security-vulnerability
 
 Add a really short descriptions after the ticket number, if presented.
-Please only respond with the branch name, without any additional explanations or formatting.`;
+
+IMPORTANT: Please only respond with the branch name, without any additional explanations or formatting.`;
 
 export default createBranchPrompt;
