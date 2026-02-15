@@ -22,8 +22,10 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "lint": "eslint .",
-    "format": "prettier --write .",
+    "lint:check": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "format:check": "prettier --check .",
+    "format:write": "prettier --write .",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "repository": {
