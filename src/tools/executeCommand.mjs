@@ -1,5 +1,6 @@
 import { tool } from '@langchain/core/tools';
 import { execaCommand } from 'execa';
+import { log } from '@clack/prompts';
 
 const executeCommand = tool(
   async ({ command }) => {
@@ -9,8 +10,6 @@ const executeCommand = tool(
       return all;
     } catch (error) {
       log.error(`Command failed: ${command}`);
-
-      // Return error information to the LLM so it can try a different approach
       const errorMessage = `Command failed with exit code ${
         error.exitCode
       }: ${command}\n\nError: ${

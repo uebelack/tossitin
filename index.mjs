@@ -1,23 +1,21 @@
 #!/usr/bin/env node
-import { intro } from '@clack/prompts';
-import branch from './src/branch.mjs';
-import add from './src/add.mjs';
-
-var state = {
-  continue: true,
-  force: false,
-};
+import { intro, outro } from "@clack/prompts";
+import branch from "./src/branch.mjs";
+import add from "./src/add.mjs";
+import commit from "./src/commit.mjs";
+import push from "./src/push.mjs";
 
 async function run() {
   intro("🪄 LET's ToSS IT iN! 💥");
 
-  state = await branch(state);
+  const force = process.argv.includes("--force");
 
-  if (state.continue) {
-    state = await add(state);
-  }
+  await branch(force);
+  await add(force);
+  await commit(force);
+  await push();
 
-  console.log(state);
+  outro("👌 Everything committed and pushed!");
 }
 
 run();

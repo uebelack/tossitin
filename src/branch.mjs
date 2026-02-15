@@ -1,15 +1,15 @@
-import { log, text, spinner } from '@clack/prompts';
-import execute from './utils/execute.mjs';
-import config from './config.mjs';
-import llm from './llm.mjs';
-import parseResult from './utils/parseResult.mjs';
-import { getBranchInstructionsFromJira } from './integrations/jira.mjs';
-import { SystemMessage, HumanMessage } from '@langchain/core/messages';
+import { log, text, spinner } from "@clack/prompts";
+import execute from "./utils/execute.mjs";
+import config from "./config.mjs";
+import llm from "./llm.mjs";
+import extractResult from "./utils/extractResult.mjs";
+import { getBranchInstructionsFromJira } from "./integrations/jira.mjs";
+import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 
 function isBranchProtected(branchName) {
   const protectedBranches = config.protectedBranches || [];
   return protectedBranches.some((branch) => {
-    if (branch.endsWith('/')) {
+    if (branch.endsWith("/")) {
       return branchName.startsWith(branch);
     }
     return branchName === branch;
@@ -23,12 +23,12 @@ async function createNewBranch(force) {
 
   if (!instructions) {
     instructions = await text({
-      message: '🙋‍♀️ How would you describe the branch you want to create?',
+      message: "🙋‍♀️ How would you describe the branch you want to create?",
     });
   }
 
-  const s = spinner();
-  s.start('🧠 Thinking...');
+  // const s = spinner();
+  // s.start("🧠 Thinking...");
 
   const result = await llm().invoke([
     new SystemMessage(config.prompts.createBranch),
@@ -37,15 +37,15 @@ async function createNewBranch(force) {
     ),
   ]);
 
-  const newBranchName = parseResult(result);
+  const newBranchName = extractResult(result);
 
-  s.stop(`👌 Perfect branch name: ${newBranchName}`);
+  // s.stop(`👌 Perfect branch name: ${newBranchName}`);
 
   if (force == true) {
     await execute(`git checkout -b ${newBranchName}`);
   } else {
     const command = await text({
-      message: 'Should I create the branch and execute this command?',
+      message: "Should I create the branch and execute this command?",
       initialValue: `git checkout -b ${newBranchName}`,
     });
 
@@ -55,23 +55,18 @@ async function createNewBranch(force) {
   return newBranchName;
 }
 
-async function branch(state) {
+async function branch(force) {
   var currentBranchName = (
-    await execute('git rev-parse --abbrev-ref HEAD')
+    await execute("git rev-parse --abbrev-ref HEAD")
   ).trim();
 
   if (isBranchProtected(currentBranchName)) {
-    currentBranchName = await createNewBranch(state.force);
+    await createNewBranch(force);
   } else {
     log.info(
       `✅ Current branch "${currentBranchName}" is not protected, let's continue...`,
     );
   }
-
-  return {
-    ...state,
-    currentBranchName,
-  };
 }
 
 export default branch;
