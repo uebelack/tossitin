@@ -1,13 +1,13 @@
-import { execa, execaCommand } from "execa";
-import { intro, outro, log } from "@clack/prompts";
-import { SystemMessage, HumanMessage } from "@langchain/core/messages";
-import { MessagesZodMeta } from "@langchain/langgraph";
-import { registry } from "@langchain/langgraph/zod";
-import { StateGraph, START, END } from "@langchain/langgraph";
+import { execa, execaCommand } from 'execa';
+import { intro, outro, log } from '@clack/prompts';
+import { SystemMessage, HumanMessage } from '@langchain/core/messages';
+import { MessagesZodMeta } from '@langchain/langgraph';
+import { registry } from '@langchain/langgraph/zod';
+import { StateGraph, START, END } from '@langchain/langgraph';
 
-import { isAIMessage, ToolMessage } from "@langchain/core/messages";
-import * as z from "zod";
-import llm from "../llm.mjs";
+import { isAIMessage, ToolMessage } from '@langchain/core/messages';
+import * as z from 'zod';
+import llm from '../llm.mjs';
 
 const toolsByName = {
   [execute.name]: execute,
@@ -23,22 +23,22 @@ const MessagesState = z.object({
 });
 
 async function checkNothingToCommit(state) {
-  const { stdout } = await execa("git", ["status", "--porcelain"]);
-  if ((stdout ?? "").trim().length === 0) {
-    outro("🛑 Nothing to commit. Exiting...");
+  const { stdout } = await execa('git', ['status', '--porcelain']);
+  if ((stdout ?? '').trim().length === 0) {
+    outro('🛑 Nothing to commit. Exiting...');
     process.exit(1);
   }
   return { ...state };
 }
 
 async function continueAfterCheck() {
-  const { stdout } = await execa("git", ["status", "--porcelain"]);
-  return (stdout ?? "").trim().length === 0 ? END : "generateCommitMessage";
+  const { stdout } = await execa('git', ['status', '--porcelain']);
+  return (stdout ?? '').trim().length === 0 ? END : 'generateCommitMessage';
 }
 
 async function addFiles(state) {
   log.info(`Adding files`);
-  await execa("git", ["add", "."]);
+  await execa('git', ['add', '.']);
   return {};
 }
 
@@ -78,33 +78,33 @@ async function shouldContinue(state) {
   if (lastMessage == null || !isAIMessage(lastMessage)) return END;
 
   if (lastMessage.tool_calls?.length) {
-    return "toolNode";
+    return 'toolNode';
   }
 
-  return "structureCommitMessage";
+  return 'structureCommitMessage';
 }
 
 async function structureCommitMessage(state) {
   const outputSchema = {
-    type: "object",
+    type: 'object',
     properties: {
       subject: {
-        type: "string",
-        description: "The subject of the commit message",
+        type: 'string',
+        description: 'The subject of the commit message',
       },
       description: {
-        type: "string",
-        description: "The description of the commit message",
+        type: 'string',
+        description: 'The description of the commit message',
       },
     },
-    required: ["subject", "description"],
+    required: ['subject', 'description'],
     additionalProperties: false,
   };
   const modelWithStructure = model.withStructuredOutput(outputSchema);
 
   const result = await modelWithStructure.invoke([
     new SystemMessage(
-      "You are a helpful assistant that structures a commit message for a git repository and adds an emoji in front of the subject.",
+      'You are a helpful assistant that structures a commit message for a git repository and adds an emoji in front of the subject.',
     ),
     state.messages[state.messages.length - 1],
   ]);
@@ -119,64 +119,64 @@ async function commit(state) {
   log.info(
     `Committing with subject: ${state.subject} and description: ${state.description}`,
   );
-  const result = await execa("git", [
-    "commit",
-    "-m",
-    state.subject ?? "",
-    "-m",
-    state.description ?? "",
+  const result = await execa('git', [
+    'commit',
+    '-m',
+    state.subject ?? '',
+    '-m',
+    state.description ?? '',
   ]);
-  log.info(`Commit result: ${result.stdout ?? ""}`);
+  log.info(`Commit result: ${result.stdout ?? ''}`);
   return {};
 }
 
 async function pull(state) {
-  log.info("Pulling");
-  const result = await execa("git", ["pull"]);
-  log.info(`Pull result: ${result.stdout ?? ""}`);
+  log.info('Pulling');
+  const result = await execa('git', ['pull']);
+  log.info(`Pull result: ${result.stdout ?? ''}`);
   return {};
 }
 
 async function push(state) {
-  log.info("Pushing");
-  const result = await execa("git", ["push"]);
-  log.info(`Push result: ${result.stdout ?? ""}`);
-  outro("🎉 everything committed and pushed! 🎉");
+  log.info('Pushing');
+  const result = await execa('git', ['push']);
+  log.info(`Push result: ${result.stdout ?? ''}`);
+  outro('🎉 everything committed and pushed! 🎉');
   return {};
 }
 
 const graph = new StateGraph(MessagesState)
-  .addNode("addFiles", addFiles)
-  .addNode("checkNothingToCommit", checkNothingToCommit)
-  .addNode("generateCommitMessage", generateCommitMessage)
-  .addNode("toolNode", toolNode)
-  .addNode("structureCommitMessage", structureCommitMessage)
-  .addNode("commit", commit)
-  .addNode("pull", pull)
-  .addNode("push", push)
-  .addEdge(START, "addFiles")
-  .addEdge("addFiles", "checkNothingToCommit")
-  .addConditionalEdges("checkNothingToCommit", continueAfterCheck, [
-    "generateCommitMessage",
+  .addNode('addFiles', addFiles)
+  .addNode('checkNothingToCommit', checkNothingToCommit)
+  .addNode('generateCommitMessage', generateCommitMessage)
+  .addNode('toolNode', toolNode)
+  .addNode('structureCommitMessage', structureCommitMessage)
+  .addNode('commit', commit)
+  .addNode('pull', pull)
+  .addNode('push', push)
+  .addEdge(START, 'addFiles')
+  .addEdge('addFiles', 'checkNothingToCommit')
+  .addConditionalEdges('checkNothingToCommit', continueAfterCheck, [
+    'generateCommitMessage',
     END,
   ])
-  .addConditionalEdges("generateCommitMessage", shouldContinue, [
-    "toolNode",
-    "structureCommitMessage",
+  .addConditionalEdges('generateCommitMessage', shouldContinue, [
+    'toolNode',
+    'structureCommitMessage',
   ])
-  .addEdge("toolNode", "generateCommitMessage")
-  .addEdge("structureCommitMessage", "commit")
-  .addEdge("commit", "pull")
-  .addEdge("pull", "push")
-  .addEdge("commit", "push")
-  .addEdge("push", END)
+  .addEdge('toolNode', 'generateCommitMessage')
+  .addEdge('structureCommitMessage', 'commit')
+  .addEdge('commit', 'pull')
+  .addEdge('pull', 'push')
+  .addEdge('commit', 'push')
+  .addEdge('push', END)
   .compile();
 
 async function run() {
   const result = await graph.invoke({
     messages: [
       new HumanMessage(
-        "Create the commit message for the changes to be committed",
+        'Create the commit message for the changes to be committed',
       ),
     ],
   });

@@ -1,5 +1,5 @@
-import { tool } from "@langchain/core/tools";
-import { execaCommand } from "execa";
+import { tool } from '@langchain/core/tools';
+import { execaCommand } from 'execa';
 
 const executeCommand = tool(
   async ({ command }) => {
@@ -20,14 +20,14 @@ const executeCommand = tool(
     }
   },
   {
-    name: "execute",
-    description: "Execute a command line command",
+    name: 'execute',
+    description: 'Execute a command line command',
     schema: {
-      type: "object",
+      type: 'object',
       properties: {
-        command: { type: "string", description: "Command to execute" },
+        command: { type: 'string', description: 'Command to execute' },
       },
-      required: ["command"],
+      required: ['command'],
       additionalProperties: false,
     },
   },

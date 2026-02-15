@@ -1,26 +1,26 @@
-import { select } from "@clack/prompts";
-import texts from "../texts.mjs";
-import branchCommand from "./branchCommand.mjs";
+import { select } from '@clack/prompts';
+import texts from '../texts.mjs';
+import branchCommand from './branchCommand.mjs';
 
 async function selectCommand() {
   const result = await select({
-    message: "🙋‍♀️ What do you want to do?",
+    message: '🙋‍♀️ What do you want to do?',
     options: [
       {
-        value: "branch",
+        value: 'branch',
         label: `branch - ${texts.commands.branch.description}`,
       },
       {
-        value: "commit",
+        value: 'commit',
         label: `commit - ${texts.commands.commit.description}`,
       },
     ],
   });
 
   switch (result) {
-    case "branch":
+    case 'branch':
       return branchCommand();
-    case "commit":
+    case 'commit':
       return null;
   }
 }

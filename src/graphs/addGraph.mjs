@@ -1,7 +1,7 @@
-import { SystemMessage, HumanMessage } from "@langchain/core/messages";
-import { StateGraph, START, END } from "@langchain/langgraph";
-import executeCommand from "../tools/executeCommand.mjs";
-import llm from "../llm.mjs";
+import { SystemMessage, HumanMessage } from '@langchain/core/messages';
+import { StateGraph, START, END } from '@langchain/langgraph';
+import executeCommand from '../tools/executeCommand.mjs';
+import llm from '../llm.mjs';
 
 const SYSTEM_PROMPT = `You are an expert Git assistant specializing in repository file management.
 
@@ -54,16 +54,16 @@ async function addFiles(state) {
 }
 
 const graph = new StateGraph(MessagesState)
-  .addNode("addFiles", addFiles)
-  .addEdge(START, "addFiles")
-  .addEdge("addFiles", END)
+  .addNode('addFiles', addFiles)
+  .addEdge(START, 'addFiles')
+  .addEdge('addFiles', END)
   .compile();
 
 async function run() {
   await graph.invoke({
     messages: [
       new HumanMessage(
-        "Create the commit message for the changes to be committed",
+        'Create the commit message for the changes to be committed',
       ),
     ],
   });

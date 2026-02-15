@@ -1,10 +1,12 @@
-import fs from "fs";
-import createBranchPrompt from "./prompts/createBranchPrompt.mjs";
+import fs from 'fs';
+import createBranchPrompt from './prompts/createBranchPrompt.mjs';
+import addPrompt from './prompts/addPrompt.mjs';
 
 const config = {
-  protectedBranches: ["main", "master", "release/", "develop", "development"],
+  protectedBranches: ['main', 'master', 'release/', 'develop', 'development'],
   prompts: {
     createBranch: createBranchPrompt,
+    addPrompt: addPrompt,
   },
 };
 

@@ -1,26 +1,26 @@
-import js from "@eslint/js";
-import globals from "globals";
-import json from "@eslint/json";
-import markdown from "@eslint/markdown";
-import { defineConfig } from "eslint/config";
+import js from '@eslint/js';
+import globals from 'globals';
+import json from '@eslint/json';
+import markdown from '@eslint/markdown';
+import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
   {
-    files: ["**/*.{js,mjs,cjs}"],
+    files: ['**/*.{js,mjs,cjs}'],
     plugins: { js },
-    extends: ["js/recommended"],
+    extends: ['js/recommended'],
     languageOptions: { globals: globals.node },
   },
   {
-    files: ["**/*.json"],
+    files: ['**/*.json'],
     plugins: { json },
-    language: "json/json",
-    extends: ["json/recommended"],
+    language: 'json/json',
+    extends: ['json/recommended'],
   },
   {
-    files: ["**/*.md"],
+    files: ['**/*.md'],
     plugins: { markdown },
-    language: "markdown/gfm",
-    extends: ["markdown/recommended"],
+    language: 'markdown/gfm',
+    extends: ['markdown/recommended'],
   },
 ]);
