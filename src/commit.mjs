@@ -4,6 +4,7 @@ import executeCommand from "./tools/executeCommand.mjs";
 import config from "./config.mjs";
 import { log, confirm } from "@clack/prompts";
 import execute from "./utils/execute.mjs";
+import extractResult from "./utils/extractResult.mjs";
 
 async function commit(force) {
   log.info("🎉 Checking for files to commit...");
@@ -25,7 +26,7 @@ async function commit(force) {
       messages: [{ role: "user", content: config.prompts.commitPrompt }],
     });
 
-    const commitMessage = result.messages[result.messages.length - 1].content;
+    const commitMessage = extractResult(result);
 
     log.info(`👌 Commit message:\n\n${commitMessage}\n\n`);
 

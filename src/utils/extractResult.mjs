@@ -1,13 +1,16 @@
 function extractResult(result) {
+  var extractedResult = result;
+
   if (result.content) {
-    return result.content;
+    extractedResult = result.content;
   }
   if (result.messages) {
-    return result.messages[result.messages.length - 1].content;
+    extractedResult = result.messages[result.messages.length - 1].content;
   }
-  if (result.indexOf("</think>") !== -1) {
-    const end = result.indexOf("</think>");
-    return result.substring(end + 8).trim();
+
+  if (extractedResult.indexOf("</think>") !== -1) {
+    const end = extractedResult.indexOf("</think>");
+    return extractedResult.substring(end + 8).trim();
   }
 }
 
