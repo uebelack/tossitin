@@ -6,7 +6,9 @@ const mockOutro = jest.fn();
 const mockExecute = jest.fn();
 const mockInvoke = jest.fn();
 const mockWithStructuredOutput = jest.fn(() => ({ invoke: mockInvoke }));
-const mockLlm = jest.fn(() => ({ withStructuredOutput: mockWithStructuredOutput }));
+const mockLlm = jest.fn(() => ({
+  withStructuredOutput: mockWithStructuredOutput,
+}));
 const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
 
 jest.unstable_mockModule("@clack/prompts", () => ({
@@ -97,17 +99,13 @@ describe("add", () => {
   it("should exit when LLM detects dangerous files", async () => {
     mockExecute.mockResolvedValueOnce("?? .env");
     mockInvoke.mockResolvedValueOnce({
-      dangerousFiles: [
-        { filename: ".env", reason: "Contains secrets" },
-      ],
+      dangerousFiles: [{ filename: ".env", reason: "Contains secrets" }],
     });
 
     const state = {};
     await add(state);
 
-    expect(mockLog.error).toHaveBeenCalledWith(
-      expect.stringContaining(".env"),
-    );
+    expect(mockLog.error).toHaveBeenCalledWith(expect.stringContaining(".env"));
     expect(mockLog.error).toHaveBeenCalledWith(
       expect.stringContaining("Contains secrets"),
     );

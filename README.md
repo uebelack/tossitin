@@ -89,7 +89,7 @@ tossitin --force
 
 ### Example
 
-```
+```bash
 ┌  🪄 LET's ToSS IT iN! 💥
 │
 ◇  ✅ Current branch "feat/my-feature" is not protected, let's continue...
@@ -115,10 +115,10 @@ tossitin --force
 
 TossItIn merges configuration from two optional files, in this order:
 
-| File | Scope |
-|------|-------|
-| `~/.tossitin/config.mjs` | Global (applies to all repos) |
-| `.tossitin.config.mjs` | Local (applies to current repo) |
+| File                     | Scope                           |
+| ------------------------ | ------------------------------- |
+| `~/.tossitin/config.mjs` | Global (applies to all repos)   |
+| `.tossitin.config.mjs`   | Local (applies to current repo) |
 
 Both files should export a default object:
 
@@ -178,12 +178,12 @@ chmod +x index.mjs
 
 ## Architecture
 
-| Package | Purpose |
-|---------|---------|
+| Package                                                                    | Purpose            |
+| -------------------------------------------------------------------------- | ------------------ |
 | [@langchain/anthropic](https://www.npmjs.com/package/@langchain/anthropic) | Claude integration |
-| [@langchain/ollama](https://www.npmjs.com/package/@langchain/ollama) | Ollama integration |
-| [@clack/prompts](https://www.npmjs.com/package/@clack/prompts) | Terminal UI |
-| [execa](https://www.npmjs.com/package/execa) | Command execution |
+| [@langchain/ollama](https://www.npmjs.com/package/@langchain/ollama)       | Ollama integration |
+| [@clack/prompts](https://www.npmjs.com/package/@clack/prompts)             | Terminal UI        |
+| [execa](https://www.npmjs.com/package/execa)                               | Command execution  |
 
 ## License
 

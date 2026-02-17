@@ -1,19 +1,19 @@
-import config from '../config.mjs';
-import { select } from '@clack/prompts';
+import config from "../config.mjs";
+import { select } from "@clack/prompts";
 
 function getUrl(endpoint) {
-  const url = config.jira.url.endsWith('/')
+  const url = config.jira.url.endsWith("/")
     ? config.jira.url.slice(0, -1)
     : config.jira.url;
-  return `${url}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+  return `${url}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 }
 
 function get(endpoint) {
   return fetch(getUrl(endpoint), {
-    method: 'GET',
+    method: "GET",
     headers: {
       Authorization: `Bearer ${config.jira.pat}`,
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
   });
 }
@@ -40,7 +40,7 @@ export async function getBranchInstructionsFromJira() {
 
     if (issues.length > 1) {
       relevantIssue = await select({
-        message: 'Select the Jira issue you want to work on:',
+        message: "Select the Jira issue you want to work on:",
         options: issues.map((issue) => ({
           value: issue,
           label: `${issue.key}: ${issue.summary}`,
