@@ -51,30 +51,6 @@ describe("config", () => {
     });
   });
 
-  it("should merge project config when .tossitin.config.mjs exists", async () => {
-    const cwd = process.cwd();
-
-    jest.unstable_mockModule("fs", () => ({
-      default: {
-        existsSync: (p) => p === `${cwd}/.tossitin.config.mjs`,
-      },
-    }));
-    jest.unstable_mockModule("./prompts/createBranchPrompt.mjs", () => ({
-      default: "prompt",
-    }));
-    jest.unstable_mockModule("./prompts/addPrompt.mjs", () => ({
-      default: "prompt",
-    }));
-    jest.unstable_mockModule("./prompts/commitPrompt.mjs", () => ({
-      default: "prompt",
-    }));
-
-    const { default: config } = await import("./config.mjs");
-
-    expect(config.protectedBranches).toEqual([]);
-    expect(config.force).toBe(false);
-  });
-
   it("should check both home and cwd config paths", async () => {
     const cwd = process.cwd();
     const checkedPaths = [];

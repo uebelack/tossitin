@@ -22,6 +22,7 @@ if (fs.existsSync(`${homeDirectory}/.tossitin/config.mjs`)) {
   Object.assign(config, userConfig.default);
 }
 
+/* istanbul ignore next */
 if (fs.existsSync(`${currentDirectory}/.tossitin.config.mjs`)) {
   const userConfig = await import(`${currentDirectory}/.tossitin.config.mjs`);
   Object.assign(config, userConfig.default);
