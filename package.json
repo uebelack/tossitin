@@ -26,7 +26,8 @@
     "lint:fix": "eslint --fix .",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage ----collectCoverageFrom='**/*.mjs'"
   },
   "repository": {
     "type": "git",
