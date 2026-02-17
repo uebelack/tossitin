@@ -10,8 +10,10 @@ function extractResult(result) {
 
   if (extractedResult.indexOf("</think>") !== -1) {
     const end = extractedResult.indexOf("</think>");
-    return extractedResult.substring(end + 8).trim();
+    extractedResult = extractedResult.substring(end + 8).trim();
   }
+
+  return extractedResult;
 }
 
 export default extractResult;
