@@ -40,9 +40,7 @@ describe("push", () => {
     await push();
 
     expect(mockExecute).toHaveBeenCalledWith("git push");
-    expect(mockExecute).toHaveBeenCalledWith(
-      "git rev-parse --abbrev-ref HEAD",
-    );
+    expect(mockExecute).toHaveBeenCalledWith("git rev-parse --abbrev-ref HEAD");
     expect(mockExecute).toHaveBeenCalledWith(
       "git push --set-upstream origin feature/my-branch",
     );

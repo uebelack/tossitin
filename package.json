@@ -26,12 +26,25 @@
     "lint:fix": "eslint --fix .",
     "format:check": "prettier --check .",
     "format:write": "prettier --write .",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage ----collectCoverageFrom='**/*.mjs'"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/uebelack/tossitin"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "**/*.mjs"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    }
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",

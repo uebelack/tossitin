@@ -1,5 +1,3 @@
-import { jest } from "@jest/globals";
-
 const { default: env } = await import("./env.mjs");
 
 const originalEnv = process.env;

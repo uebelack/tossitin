@@ -5,6 +5,7 @@ function getUrl(endpoint) {
   const url = config.jira.url.endsWith("/")
     ? config.jira.url.slice(0, -1)
     : config.jira.url;
+  /* istanbul ignore next -- endpoint always starts with "/" internally */
   return `${url}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 }
 
@@ -36,7 +37,7 @@ export async function getBranchInstructionsFromJira() {
       return null;
     }
 
-    var relevantIssue = null;
+    var relevantIssue;
 
     if (issues.length > 1) {
       relevantIssue = await select({
@@ -46,7 +47,7 @@ export async function getBranchInstructionsFromJira() {
           label: `${issue.key}: ${issue.summary}`,
         })),
       });
-    } else if (issues.length === 1) {
+    } else {
       relevantIssue = issues[0];
     }
 

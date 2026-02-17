@@ -1,5 +1,3 @@
-import { jest } from "@jest/globals";
-
 const { default: extractResult } = await import("./extractResult.mjs");
 
 describe("extractResult", () => {

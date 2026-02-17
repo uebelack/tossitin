@@ -47,9 +47,7 @@ describe("branch", () => {
 
     await branch(false);
 
-    expect(mockExecute).toHaveBeenCalledWith(
-      "git rev-parse --abbrev-ref HEAD",
-    );
+    expect(mockExecute).toHaveBeenCalledWith("git rev-parse --abbrev-ref HEAD");
     expect(mockLog.info).toHaveBeenCalledWith(
       expect.stringContaining("not protected"),
     );
