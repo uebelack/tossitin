@@ -18,7 +18,8 @@ jobs:
           node-version: 22
           cache: yarn
 
-      - run: yarn ci
+      - name: Install
+        run: yarn install
 
       - name: Check formatting
         run: yarn run format:check
