@@ -16,15 +16,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: yarn
 
-      - run: npm ci
+      - run: yarn ci
 
       - name: Check formatting
-        run: npm run format:check
+        run: yarn run format:check
 
       - name: Lint
-        run: npm run lint:check
+        run: yarn run lint:check
 
       - name: Test
-        run: npm test
+        run: yarn test
