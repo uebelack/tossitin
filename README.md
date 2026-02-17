@@ -1,5 +1,11 @@
 # TossItIn
 
+[![CI](https://github.com/uebelack/tossitin/actions/workflows/ci.yml/badge.svg)](https://github.com/uebelack/tossitin/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/tossitin)](https://www.npmjs.com/package/tossitin)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js >= 22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org/)
+[![Coverage Status](https://coveralls.io/repos/github/uebelack/tossitin/badge.svg?branch=main)](https://coveralls.io/github/uebelack/tossitin?branch=main)
+
 AI-powered git workflow tool that analyzes your changes, generates meaningful commit messages, and pushes to your repository — all in one command.
 
 Built with [LangChain](https://www.langchain.com/) and [Claude](https://www.anthropic.com/claude) (Anthropic) or [Ollama](https://ollama.com/) for local models.
