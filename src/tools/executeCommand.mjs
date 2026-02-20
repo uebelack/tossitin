@@ -7,6 +7,9 @@ const executeCommand = tool(
     log.info(`Executing command: ${command}`);
     try {
       const { all } = await execaCommand(command, { shell: true, all: true });
+      if (all.length > 10000) {
+        return all.slice(0, 10000);
+      }
       return all;
     } catch (error) {
       log.error(`Command failed: ${command}`);

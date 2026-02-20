@@ -3,3 +3,4 @@ coverage
 .idea
 test.mjs
 .tossitin.config.mjs
+.yarn

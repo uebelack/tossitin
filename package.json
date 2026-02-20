@@ -1,12 +1,10 @@
 {
   "name": "tossitin",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Generate git commit messages using a LangGraph workflow that inspects repo state and commits changes",
   "main": "index.mjs",
   "type": "module",
-  "bin": {
-    "tossitin": "./index.mjs"
-  },
+  "bin": "./index.mjs",
   "keywords": [
     "git",
     "commit",
@@ -32,6 +30,7 @@
     "type": "git",
     "url": "https://github.com/uebelack/tossitin"
   },
+  "packageManager": "yarn@4.12.0",
   "jest": {
     "collectCoverage": true,
     "collectCoverageFrom": [
