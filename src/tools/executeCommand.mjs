@@ -8,7 +8,7 @@ const executeCommand = tool(
     try {
       const { all } = await execaCommand(command, { shell: true, all: true });
       if (all.length > 10000) {
-        return all.slice(0, 10000);
+        return all.slice(0, 10000) + "\n\n...truncated...";
       }
       return all;
     } catch (error) {
