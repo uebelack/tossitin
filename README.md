@@ -1,46 +1,57 @@
-# TossItIn 🚀
+# TossItIn
 
-AI-powered git commit message generator that automatically analyzes your changes, creates meaningful commit messages, and pushes to your repository.
+[![CI](https://github.com/uebelack/tossitin/actions/workflows/ci.yml/badge.svg)](https://github.com/uebelack/tossitin/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/tossitin)](https://www.npmjs.com/package/tossitin)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js >= 22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org/)
+[![Coverage Status](https://coveralls.io/repos/github/uebelack/tossitin/badge.svg?branch=main)](https://coveralls.io/github/uebelack/tossitin?branch=main)
 
-Built with [LangGraph](https://langchain-ai.github.io/langgraph/) and [Claude](https://www.anthropic.com/claude) (Anthropic).
+AI-powered git workflow tool that analyzes your changes, generates meaningful commit messages, and pushes to your repository — all in one command.
+
+Built with [LangChain](https://www.langchain.com/) and [Claude](https://www.anthropic.com/claude) (Anthropic) or [Ollama](https://ollama.com/) for local models.
+
+## ⚠️ WARNING
+
+**TossItIn uses large language models (LLMs), which make mistakes.**
+
+LLMs can and will produce incorrect, incomplete, or outright wrong output — including bad commit messages, wrong branch names, and false negatives when scanning for dangerous files. **Do not blindly trust anything this tool generates.** Always review the output before accepting it.
+
+This tool interacts directly with your git repository and can stage files, create commits, and push to remote branches. A mistake here can affect your repository history and your team. **Use it at your own risk.**
+
+---
 
 ## Features
 
-- 🤖 **AI-Powered Analysis**: Uses Claude to understand your code changes
-- 📝 **Smart Commit Messages**: Generates subject lines with emojis and detailed descriptions
-- 🔄 **Full Automation**: Stages, commits, and pushes in one command
-- 🛠️ **Tool-Based Workflow**: AI inspects git state using `git status` and `git diff`
-- ⚡ **Simple**: One command to go from changes to pushed commits
+- **Branch protection**: Detects protected branches and helps create a properly named feature branch
+- **Safe staging**: AI scans new untracked files for dangerous content (secrets, credentials) before adding them
+- **Smart commit messages**: Uses an AI agent with git tools to generate subject lines and descriptions
+- **Interactive confirmation**: Review and approve the commit message before it's applied (skippable with `--force`)
+- **Auto push**: Pushes to remote and sets up tracking branches automatically
+- **Jira integration**: Fetches in-progress Jira issues to inform branch names
+- **Local LLM support**: Works with Ollama as an alternative to Claude
 
 ## Installation
 
-### Global Installation (Recommended)
-
 ```bash
+# Global (recommended)
 npm install -g tossitin
-```
 
-### Run Without Installing
-
-```bash
+# Without installing
 npx tossitin
-```
 
-### Local Installation
-
-```bash
+# Local
 npm install tossitin
 ```
 
 ## Requirements
 
 - Node.js v22 or higher
-- Git repository initialized
-- Anthropic API key ([get one here](https://console.anthropic.com/))
+- A git repository with at least one remote configured
+- An LLM backend (Anthropic API key or Ollama)
 
 ## Setup
 
-Set your Anthropic API key as an environment variable:
+### Claude (Anthropic)
 
 ```bash
 export ANTHROPIC_API_KEY=your_api_key_here
@@ -52,102 +63,133 @@ To make it permanent, add to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.):
 echo 'export ANTHROPIC_API_KEY=your_api_key_here' >> ~/.zshrc
 ```
 
-## Usage
+Get an API key at [console.anthropic.com](https://console.anthropic.com/).
 
-1. Make changes to your code
-2. Run tossitin in your git repository:
+### Ollama (local)
+
+```bash
+export OLLAMA_MODEL=llama3.2
+```
+
+TossItIn uses Claude if `ANTHROPIC_API_KEY` is set, otherwise falls back to the model specified in `OLLAMA_MODEL`.
+
+## Usage
 
 ```bash
 tossitin
 ```
 
-That's it! The tool will:
-
-1. Stage all changes (`git add .`)
-2. Analyze the changes using AI
-3. Generate a commit message with subject and description
-4. Commit the changes
-5. Push to your remote repository
-
-### Example Output
+Or skip all confirmation prompts:
 
 ```bash
-┌  Let's toss it in! 🚀
-│
-◇  Adding files
-◇  Executing command: git status
-◇  Executing command: git diff --cached
-◇  Committing with subject: ✨ Add README and improve workflow
-│  and description: Added comprehensive documentation and improved
-│  the workflow with early exit check for empty repositories
-◇  Commit result: [main 9145851] ✨ Add README and improve workflow
-◇  Pushing
-│
-└  🎉 everything committed and pushed! 🎉
+tossitin --force
 ```
 
-## How It Works
+### What it does
 
-TossItIn uses a [LangGraph](https://langchain-ai.github.io/langgraph/) state machine workflow:
+1. **Branch check** — If the current branch is protected (`main`, `master`, `develop`, `release/*`, etc.), it prompts you to describe your work and creates a new branch with an AI-generated name.
+2. **Stage files** — Runs `git add .`, but first scans any new untracked files with AI. If a file looks dangerous (e.g., contains secrets or credentials), it stops and warns you before anything is staged.
+3. **Generate commit message** — An AI agent runs `git status` and `git diff --cached` to understand your changes, then writes a commit message with a subject line and description.
+4. **Confirm and commit** — Shows you the message and asks for confirmation (auto-approved with `--force`).
+5. **Push** — Pushes to the remote, automatically setting the upstream tracking branch if needed.
 
-1. **Stage Changes**: Automatically runs `git add .`
-2. **Check for Changes**: Validates there are changes to commit
-3. **AI Analysis**: Claude inspects repository state using git commands
-4. **Generate Message**: Creates a structured commit message (subject + description)
-5. **Commit**: Commits with the generated message
-6. **Push**: Pushes to remote repository
+### Example
 
-The AI has access to a tool that can execute git commands, allowing it to inspect `git status` and `git diff --cached` to understand exactly what changed.
+```bash
+┌  🪄 LET's ToSS IT iN! 💥
+│
+◇  ✅ Current branch "feat/my-feature" is not protected, let's continue...
+◇  🎉 Checking for new files to add...
+◇  🧠 Thinking...
+◇  🎉 Adding files:
+│      👉 src/utils/helper.mjs
+◇  🧠 Creating commit message...
+◇  👌 Commit message:
+│
+│  ✨ feat: add helper utility for string formatting
+│
+│  Introduced a new utility module with string formatting helpers
+│  used across multiple components to reduce duplication.
+│
+◇  Should I commit with this message? › Yes
+◇  🎉 Pushing to remote...
+│
+└  👌 Everything committed and pushed!
+```
+
+## Configuration
+
+TossItIn merges configuration from two optional files, in this order:
+
+| File                     | Scope                           |
+| ------------------------ | ------------------------------- |
+| `~/.tossitin/config.mjs` | Global (applies to all repos)   |
+| `.tossitin.config.mjs`   | Local (applies to current repo) |
+
+Both files should export a default object:
+
+```js
+// .tossitin.config.mjs
+export default {
+  force: false,
+  protectedBranches: ["main", "master", "release/", "develop", "development"],
+};
+```
+
+### Jira integration
+
+Add Jira config to automatically select an in-progress issue when creating a branch:
+
+```js
+// ~/.tossitin/config.mjs
+export default {
+  jira: {
+    url: "https://yourcompany.atlassian.net",
+    pat: "your_personal_access_token",
+    jql: "assignee = currentUser() AND status = 'In Progress'",
+  },
+};
+```
 
 ## Development
-
-### Clone and Install
 
 ```bash
 git clone https://github.com/uebelack/tossitin.git
 cd tossitin
-npm install
-```
+yarn install
 
-### Link for Local Testing
-
-```bash
-npm link
-tossitin  # Test from any directory
-```
-
-### Run Directly
-
-```bash
+# Run directly
 node index.mjs
+
+# Run tests
+yarn test
+
+# Lint
+yarn lint:check
 ```
 
 ## Troubleshooting
 
-**Nothing to commit**: Make sure you have uncommitted changes before running tossitin.
+**Nothing to commit** — Make sure you have staged or unstaged changes before running tossitin.
 
-**Missing API key**: Ensure `ANTHROPIC_API_KEY` is set in your environment:
+**Missing LLM config** — Set either `ANTHROPIC_API_KEY` or `OLLAMA_MODEL` in your environment.
 
-```bash
-echo $ANTHROPIC_API_KEY  # Should display your key
-```
-
-**Permission denied**: If you get a permission error, make sure index.mjs is executable:
+**Permission denied** — Make sure `index.mjs` is executable:
 
 ```bash
 chmod +x index.mjs
 ```
 
+**Push fails** — Ensure your remote is configured (`git remote -v`) and you have push access.
+
 ## Architecture
 
-Built with:
-
-- **[@langchain/langgraph](https://www.npmjs.com/package/@langchain/langgraph)**: State machine workflow orchestration
-- **[@langchain/anthropic](https://www.npmjs.com/package/@langchain/anthropic)**: Claude AI integration
-- **[@clack/prompts](https://www.npmjs.com/package/@clack/prompts)**: Beautiful terminal UI
-- **[execa](https://www.npmjs.com/package/execa)**: Command execution
-
-See [CLAUDE.md](./CLAUDE.md) for detailed architecture documentation.
+| Package                                                                    | Purpose            |
+| -------------------------------------------------------------------------- | ------------------ |
+| [@langchain/anthropic](https://www.npmjs.com/package/@langchain/anthropic) | Claude integration |
+| [@langchain/ollama](https://www.npmjs.com/package/@langchain/ollama)       | Ollama integration |
+| [@clack/prompts](https://www.npmjs.com/package/@clack/prompts)             | Terminal UI        |
+| [execa](https://www.npmjs.com/package/execa)                               | Command execution  |
 
 ## License
 

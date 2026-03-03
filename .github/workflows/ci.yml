@@ -16,15 +16,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: yarn
 
-      - run: npm ci
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install
+        run: yarn install
 
       - name: Check formatting
-        run: npm run format:check
+        run: yarn run format:check
 
       - name: Lint
-        run: npm run lint:check
+        run: yarn run lint:check
 
       - name: Test
-        run: npm test
+        run: yarn test
+
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

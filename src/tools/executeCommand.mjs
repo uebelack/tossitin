@@ -1,12 +1,15 @@
-import { tool } from '@langchain/core/tools';
-import { execaCommand } from 'execa';
-import { log } from '@clack/prompts';
+import { tool } from "@langchain/core/tools";
+import { execaCommand } from "execa";
+import { log } from "@clack/prompts";
 
 const executeCommand = tool(
   async ({ command }) => {
     log.info(`Executing command: ${command}`);
     try {
       const { all } = await execaCommand(command, { shell: true, all: true });
+      if (all.length > 10000) {
+        return all.slice(0, 10000) + "\n\n...truncated...";
+      }
       return all;
     } catch (error) {
       log.error(`Command failed: ${command}`);
@@ -19,14 +22,14 @@ const executeCommand = tool(
     }
   },
   {
-    name: 'execute',
-    description: 'Execute a command line command',
+    name: "execute",
+    description: "Execute a command line command",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        command: { type: 'string', description: 'Command to execute' },
+        command: { type: "string", description: "Command to execute" },
       },
-      required: ['command'],
+      required: ["command"],
       additionalProperties: false,
     },
   },
