@@ -2,9 +2,16 @@ import { createAgent } from "langchain";
 import llm from "./llm.mjs";
 import executeCommand from "./tools/executeCommand.mjs";
 import config from "./config.mjs";
-import { log, confirm } from "@clack/prompts";
+import { log, confirm, isCancel, cancel } from "@clack/prompts";
+import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import execute from "./utils/execute.mjs";
 import extractResult from "./utils/extractResult.mjs";
+import * as z from "zod";
+
+const CommitMessage = z.object({
+  title: z.string(),
+  description: z.string(),
+});
 
 async function commit(force) {
   log.info("🎉 Checking for files to commit...");
@@ -22,11 +29,18 @@ async function commit(force) {
       tools: [executeCommand],
     });
 
-    const result = await agent.invoke({
+    const rawResult = await agent.invoke({
       messages: [{ role: "user", content: config.prompts.commitPrompt }],
     });
 
-    const commitMessage = extractResult(result);
+    const result = extractResult(rawResult);
+
+    const commitMessage = await (await llm())
+      .withStructuredOutput(CommitMessage)
+      .invoke([
+        new SystemMessage(config.prompts.extractCommitMessagePrompt),
+        new HumanMessage(result),
+      ]);
 
     log.info(`👌 Commit message:\n\n${commitMessage}\n\n`);
 
@@ -35,6 +49,11 @@ async function commit(force) {
       (await confirm({
         message: "Should I commit with this message?",
       }));
+
+    if (isCancel(shouldCommit)) {
+      cancel("❌ Cancelled.");
+      process.exit(0);
+    }
 
     if (shouldCommit) {
       await execute(`git commit -m "${commitMessage}"`);

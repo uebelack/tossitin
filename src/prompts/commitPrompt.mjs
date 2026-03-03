@@ -31,8 +31,6 @@ Example commit message:
 🎨 style(PROJECT-456): update styles
 🚀 perf(PROJECT-456): improve performance
 🛠️ build(PROJECT-456): update build system
-
-
-IMPORTANT: Please only respond with the commit message, without any additional explanations or formatting!`;
+`;
 
 export default commitPrompt;

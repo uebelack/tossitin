@@ -2,6 +2,7 @@ import fs from "fs";
 import createBranchPrompt from "./prompts/createBranchPrompt.mjs";
 import addPrompt from "./prompts/addPrompt.mjs";
 import commitPrompt from "./prompts/commitPrompt.mjs";
+import extractCommitMessagePrompt from "./prompts/extractCommitMessagePrompt.mjs";
 
 const config = {
   force: false,
@@ -10,6 +11,7 @@ const config = {
     createBranch: createBranchPrompt,
     addPrompt: addPrompt,
     commitPrompt: commitPrompt,
+    extractCommitMessagePrompt: extractCommitMessagePrompt,
   },
 };
 

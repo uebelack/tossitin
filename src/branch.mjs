@@ -1,4 +1,4 @@
-import { log, text, spinner } from "@clack/prompts";
+import { log, text, spinner, isCancel, cancel } from "@clack/prompts";
 import execute from "./utils/execute.mjs";
 import config from "./config.mjs";
 import llm from "./llm.mjs";
@@ -25,6 +25,11 @@ async function createNewBranch(force) {
     instructions = await text({
       message: "🙋‍♀️ How would you describe the branch you want to create?",
     });
+
+    if (isCancel(instructions)) {
+      cancel("❌ Cancelled.");
+      process.exit(0);
+    }
   }
 
   const s = spinner();
@@ -48,6 +53,11 @@ async function createNewBranch(force) {
       message: "Should I create the branch and execute this command?",
       initialValue: `git checkout -b ${newBranchName}`,
     });
+
+    if (isCancel(command)) {
+      cancel("❌ Cancelled.");
+      process.exit(0);
+    }
 
     await execute(command);
   }
