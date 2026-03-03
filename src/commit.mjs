@@ -2,7 +2,7 @@ import { createAgent } from "langchain";
 import llm from "./llm.mjs";
 import executeCommand from "./tools/executeCommand.mjs";
 import config from "./config.mjs";
-import { log, confirm, isCancel, cancel } from "@clack/prompts";
+import { log, confirm, isCancel, cancel, spinner, text } from "@clack/prompts";
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import execute from "./utils/execute.mjs";
 import extractResult from "./utils/extractResult.mjs";
@@ -35,6 +35,9 @@ async function commit(force) {
 
     const result = extractResult(rawResult);
 
+    const s = spinner();
+    s.start("🧠 Thinking...");
+
     const commitMessage = await (await llm())
       .withStructuredOutput(CommitMessage)
       .invoke([
@@ -42,23 +45,41 @@ async function commit(force) {
         new HumanMessage(result),
       ]);
 
-    log.info(`👌 Commit message:\n\n${commitMessage}\n\n`);
+    s.stop();
 
-    const shouldCommit =
+    var title = commitMessage.title;
+
+    if (!force) {
+      title = await text({
+        message: "Should I use this title for the commit message?",
+        initialValue: commitMessage.title,
+      });
+
+      if (isCancel(title)) {
+        cancel("❌ Cancelled.");
+        process.exit(0);
+      }
+    }
+
+    const shouldAddDescription =
       force ||
       (await confirm({
-        message: "Should I commit with this message?",
+        message:
+          "Should I add this description to the commit message?\n\n" +
+          commitMessage.description,
       }));
 
-    if (isCancel(shouldCommit)) {
+    if (isCancel(shouldAddDescription)) {
       cancel("❌ Cancelled.");
       process.exit(0);
     }
 
-    if (shouldCommit) {
-      await execute(`git commit -m "${commitMessage}"`);
+    if (shouldAddDescription) {
+      await execute(
+        `git commit -m "${title}" -m "${commitMessage.description}"`,
+      );
     } else {
-      process.exit(0);
+      await execute(`git commit -m "${title}"`);
     }
   } else {
     log.info("👌 No files to commit, exiting.");
