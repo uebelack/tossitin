@@ -66,9 +66,7 @@ async function createNewBranch() {
 }
 
 async function branch(force) {
-  var currentBranchName = (
-    await execute("git rev-parse --abbrev-ref HEAD")
-  ).trim();
+  var currentBranchName = (await execute("git branch --show-current")).trim();
 
   if (isBranchProtected(currentBranchName)) {
     await createNewBranch(force);
