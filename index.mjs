@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { intro, outro } from "@clack/prompts";
+import { intro, outro, log } from "@clack/prompts";
 import branch from "./src/branch.mjs";
 import add from "./src/add.mjs";
 import commit from "./src/commit.mjs";
@@ -9,11 +9,17 @@ import config from "./src/config.mjs";
 async function run() {
   intro("🪄 LET's ToSS IT iN! 💥");
 
-  const force = process.argv.includes("--force") || config.force;
+  config.force = process.argv.includes("--force") || config.force;
+  config.debug = process.argv.includes("--debug") || config.debug;
 
-  await branch(force);
-  await add(force);
-  await commit(force);
+  if (config.debug) {
+    log.info("🐞 Debug mode enabled");
+    log.info("⚙️ Current configuration:\n" + JSON.stringify(config, null, 2));
+  }
+
+  await branch();
+  await add();
+  await commit();
   await push();
 
   outro("👌 Everything committed and pushed!");

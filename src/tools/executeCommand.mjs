@@ -1,16 +1,25 @@
 import { tool } from "@langchain/core/tools";
 import { execaCommand } from "execa";
 import { log } from "@clack/prompts";
+import config from "../config.mjs";
 
 const executeCommand = tool(
   async ({ command }) => {
     log.info(`Executing command: ${command}`);
     try {
       const { all } = await execaCommand(command, { shell: true, all: true });
-      if (all.length > 10000) {
-        return all.slice(0, 10000) + "\n\n...truncated...";
+
+      let result = all.trim();
+
+      if (result.length > 10000) {
+        result = result.slice(0, 10000) + "\n\n...truncated...";
       }
-      return all;
+
+      if (config.debug) {
+        log.info(`Command output: ${result}`);
+      }
+
+      return result;
     } catch (error) {
       log.error(`Command failed: ${command}`);
       const errorMessage = `Command failed with exit code ${
@@ -18,6 +27,11 @@ const executeCommand = tool(
       }: ${command}\n\nError: ${
         error.stderr || error.message
       }\n\nTip: If using git commands with options and file paths, make sure options (like --stat) come before file paths (like index.mjs).`;
+
+      if (config.debug) {
+        log.info(`Command error: ${errorMessage}`);
+      }
+
       return errorMessage;
     }
   },

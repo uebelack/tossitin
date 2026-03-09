@@ -16,7 +16,7 @@ function isBranchProtected(branchName) {
   });
 }
 
-async function createNewBranch(force) {
+async function createNewBranch() {
   log.info(`🔐 Current branch is protected, let's create a new branch...`);
 
   var instructions = await getBranchInstructionsFromJira();
@@ -46,7 +46,7 @@ async function createNewBranch(force) {
 
   s.stop(`👌 Perfect branch name: ${newBranchName}`);
 
-  if (force == true) {
+  if (config.force == true) {
     await execute(`git checkout -b ${newBranchName}`);
   } else {
     const command = await text({

@@ -13,7 +13,7 @@ const CommitMessage = z.object({
   description: z.string(),
 });
 
-async function commit(force) {
+async function commit() {
   log.info("🎉 Checking for files to commit...");
   const filesToCommit = (await execute("git status -s"))
     .trim()
@@ -49,7 +49,7 @@ async function commit(force) {
 
     var title = commitMessage.title;
 
-    if (!force) {
+    if (!config.force) {
       title = await text({
         message: "Should I use this title for the commit message?",
         initialValue: commitMessage.title,
@@ -62,7 +62,7 @@ async function commit(force) {
     }
 
     const shouldAddDescription =
-      force ||
+      config.force ||
       (await confirm({
         message:
           "Should I add this description to the commit message?\n\n" +

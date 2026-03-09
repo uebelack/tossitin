@@ -6,6 +6,7 @@ import extractCommitMessagePrompt from "./prompts/extractCommitMessagePrompt.mjs
 
 const config = {
   force: false,
+  debug: false,
   protectedBranches: ["main", "master", "release/", "develop", "development"],
   prompts: {
     createBranch: createBranchPrompt,

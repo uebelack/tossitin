@@ -14,7 +14,7 @@ const DangerousFiles = z.object({
   dangerousFiles: z.array(DangerousFile),
 });
 
-async function add(state) {
+async function add() {
   log.info(`🎉 Checking for new files to add...`);
 
   const filesToAdd = (await execute("git status -s"))
@@ -51,8 +51,6 @@ async function add(state) {
   }
 
   await execute("git add .");
-
-  return state;
 }
 
 export default add;
