@@ -22,10 +22,17 @@ jest.unstable_mockModule("@clack/prompts", () => ({
   log: mockLog,
 }));
 
+const mockConfig = { debug: false };
+
+jest.unstable_mockModule("../config.mjs", () => ({
+  default: mockConfig,
+}));
+
 const { default: executeCommand } = await import("./executeCommand.mjs");
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockConfig.debug = false;
 });
 
 describe("executeCommand", () => {
@@ -124,5 +131,41 @@ describe("executeCommand", () => {
     const result = await executeCommand({ command: "git add ." });
 
     expect(result).toBe("");
+  });
+
+  it("should truncate output longer than 10000 characters", async () => {
+    const longOutput = "x".repeat(15000);
+    mockExecaCommand.mockResolvedValueOnce({ all: longOutput });
+
+    const result = await executeCommand({ command: "git log" });
+
+    expect(result.length).toBeLessThan(15000);
+    expect(result).toContain("...truncated...");
+  });
+
+  it("should log command output when debug is enabled", async () => {
+    mockConfig.debug = true;
+    mockExecaCommand.mockResolvedValueOnce({ all: "debug output" });
+
+    await executeCommand({ command: "git status" });
+
+    expect(mockLog.info).toHaveBeenCalledWith(
+      expect.stringContaining("debug output"),
+    );
+  });
+
+  it("should log error details when debug is enabled and command fails", async () => {
+    mockConfig.debug = true;
+    mockExecaCommand.mockRejectedValueOnce({
+      exitCode: 1,
+      stderr: "some error",
+      message: "failed",
+    });
+
+    await executeCommand({ command: "bad command" });
+
+    expect(mockLog.info).toHaveBeenCalledWith(
+      expect.stringContaining("Command error"),
+    );
   });
 });

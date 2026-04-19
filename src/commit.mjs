@@ -5,6 +5,7 @@ import config from "./config.mjs";
 import { log, confirm, isCancel, cancel, spinner, text } from "@clack/prompts";
 import { SystemMessage, HumanMessage } from "@langchain/core/messages";
 import execute from "./utils/execute.mjs";
+import escapeShell from "./utils/escapeShell.mjs";
 import extractResult from "./utils/extractResult.mjs";
 import * as z from "zod";
 
@@ -76,10 +77,10 @@ async function commit() {
 
     if (shouldAddDescription) {
       await execute(
-        `git commit -m "${title}" -m "${commitMessage.description}"`,
+        `git commit -m "${escapeShell(title)}" -m "${escapeShell(commitMessage.description)}"`,
       );
     } else {
-      await execute(`git commit -m "${title}"`);
+      await execute(`git commit -m "${escapeShell(title)}"`);
     }
   } else {
     log.info("👌 No files to commit, exiting.");

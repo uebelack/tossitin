@@ -52,7 +52,7 @@ export async function getBranchInstructionsFromJira() {
         cancel("❌ Cancelled.");
         process.exit(0);
       }
-    } else if (issues.length === 1) {
+    } else {
       relevantIssue = issues[0];
     }
 

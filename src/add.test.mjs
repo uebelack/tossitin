@@ -49,26 +49,22 @@ describe("add", () => {
     mockExecute.mockResolvedValueOnce("M  src/index.mjs");
     mockExecute.mockResolvedValueOnce("");
 
-    const state = { foo: "bar" };
-    const result = await add(state);
+    await add();
 
     expect(mockExecute).toHaveBeenCalledWith("git status -s");
     expect(mockExecute).toHaveBeenCalledWith("git add .");
     expect(mockLlm).not.toHaveBeenCalled();
-    expect(result).toBe(state);
   });
 
   it("should run git add when there are no files at all", async () => {
     mockExecute.mockResolvedValueOnce("");
     mockExecute.mockResolvedValueOnce("");
 
-    const state = {};
-    const result = await add(state);
+    await add();
 
     expect(mockExecute).toHaveBeenCalledWith("git status -s");
     expect(mockExecute).toHaveBeenCalledWith("git add .");
     expect(mockLlm).not.toHaveBeenCalled();
-    expect(result).toBe(state);
   });
 
   it("should check untracked files with LLM and add them if safe", async () => {
@@ -76,8 +72,7 @@ describe("add", () => {
     mockExecute.mockResolvedValueOnce("");
     mockInvoke.mockResolvedValueOnce({ dangerousFiles: [] });
 
-    const state = { key: "value" };
-    const result = await add(state);
+    await add();
 
     expect(mockLlm).toHaveBeenCalled();
     expect(mockWithStructuredOutput).toHaveBeenCalled();
@@ -93,7 +88,6 @@ describe("add", () => {
       expect.stringContaining("newfile.txt"),
     );
     expect(mockExecute).toHaveBeenCalledWith("git add .");
-    expect(result).toBe(state);
   });
 
   it("should exit when LLM detects dangerous files", async () => {
@@ -102,8 +96,7 @@ describe("add", () => {
       dangerousFiles: [{ filename: ".env", reason: "Contains secrets" }],
     });
 
-    const state = {};
-    await add(state);
+    await add();
 
     expect(mockLog.error).toHaveBeenCalledWith(expect.stringContaining(".env"));
     expect(mockLog.error).toHaveBeenCalledWith(

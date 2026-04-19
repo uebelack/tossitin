@@ -12,6 +12,8 @@ jest.unstable_mockModule("@clack/prompts", () => ({
   log: mockLog,
   text: mockText,
   spinner: () => mockSpinner,
+  isCancel: jest.fn(() => false),
+  cancel: jest.fn(),
 }));
 
 jest.unstable_mockModule("./utils/execute.mjs", () => ({

@@ -21,4 +21,13 @@ describe("prompts", () => {
     expect(typeof createBranchPrompt).toBe("string");
     expect(createBranchPrompt.length).toBeGreaterThan(0);
   });
+
+  it("should export extractCommitMessagePrompt as a non-empty string", async () => {
+    const { default: extractCommitMessagePrompt } = await import(
+      "./extractCommitMessagePrompt.mjs"
+    );
+
+    expect(typeof extractCommitMessagePrompt).toBe("string");
+    expect(extractCommitMessagePrompt.length).toBeGreaterThan(0);
+  });
 });

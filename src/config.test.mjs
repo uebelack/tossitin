@@ -37,6 +37,12 @@ describe("config", () => {
     jest.unstable_mockModule("./prompts/commitPrompt.mjs", () => ({
       default: "mock commit prompt",
     }));
+    jest.unstable_mockModule(
+      "./prompts/extractCommitMessagePrompt.mjs",
+      () => ({
+        default: "mock extract commit message prompt",
+      }),
+    );
 
     const { default: config } = await import("./config.mjs");
 
@@ -48,6 +54,7 @@ describe("config", () => {
       createBranch: "mock create branch prompt",
       addPrompt: "mock add prompt",
       commitPrompt: "mock commit prompt",
+      extractCommitMessagePrompt: "mock extract commit message prompt",
     });
   });
 
@@ -72,6 +79,12 @@ describe("config", () => {
     jest.unstable_mockModule("./prompts/commitPrompt.mjs", () => ({
       default: "prompt",
     }));
+    jest.unstable_mockModule(
+      "./prompts/extractCommitMessagePrompt.mjs",
+      () => ({
+        default: "prompt",
+      }),
+    );
 
     await import("./config.mjs");
 

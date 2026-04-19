@@ -3,15 +3,20 @@ import { jest } from "@jest/globals";
 const mockLog = { info: jest.fn() };
 const mockText = jest.fn();
 const mockSpinner = { start: jest.fn(), stop: jest.fn() };
+const mockIsCancel = jest.fn(() => false);
+const mockCancel = jest.fn();
 const mockExecute = jest.fn();
 const mockInvoke = jest.fn();
 const mockLlm = jest.fn(() => ({ invoke: mockInvoke }));
 const mockGetBranchInstructionsFromJira = jest.fn();
+const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
 
 jest.unstable_mockModule("@clack/prompts", () => ({
   log: mockLog,
   text: mockText,
   spinner: () => mockSpinner,
+  isCancel: mockIsCancel,
+  cancel: mockCancel,
 }));
 
 jest.unstable_mockModule("./utils/execute.mjs", () => ({
@@ -22,13 +27,15 @@ jest.unstable_mockModule("./llm.mjs", () => ({
   default: mockLlm,
 }));
 
-jest.unstable_mockModule("./config.mjs", () => ({
-  default: {
-    protectedBranches: ["main", "release/"],
-    prompts: {
-      createBranch: "test create branch prompt",
-    },
+const mockConfig = {
+  protectedBranches: ["main", "release/"],
+  prompts: {
+    createBranch: "test create branch prompt",
   },
+};
+
+jest.unstable_mockModule("./config.mjs", () => ({
+  default: mockConfig,
 }));
 
 jest.unstable_mockModule("./integrations/jira.mjs", () => ({
@@ -39,6 +46,13 @@ const { default: branch } = await import("./branch.mjs");
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockConfig.force = undefined;
+  mockIsCancel.mockReturnValue(false);
+  mockExit.mockImplementation(() => {});
+});
+
+afterAll(() => {
+  mockExit.mockRestore();
 });
 
 describe("branch", () => {
@@ -47,7 +61,7 @@ describe("branch", () => {
 
     await branch(false);
 
-    expect(mockExecute).toHaveBeenCalledWith("git rev-parse --abbrev-ref HEAD");
+    expect(mockExecute).toHaveBeenCalledWith("git branch --show-current");
     expect(mockLog.info).toHaveBeenCalledWith(
       expect.stringContaining("not protected"),
     );
@@ -122,13 +136,14 @@ describe("branch", () => {
   });
 
   it("should force create branch without confirmation when force is true", async () => {
+    mockConfig.force = true;
     mockExecute.mockResolvedValueOnce("main\n");
     mockGetBranchInstructionsFromJira.mockResolvedValueOnce(null);
     mockText.mockResolvedValueOnce("add feature");
     mockInvoke.mockResolvedValueOnce({ content: "feature/add-feature" });
     mockExecute.mockResolvedValueOnce("");
 
-    await branch(true);
+    await branch();
 
     expect(mockExecute).toHaveBeenCalledWith(
       "git checkout -b feature/add-feature",
@@ -144,7 +159,7 @@ describe("branch", () => {
     mockInvoke.mockResolvedValueOnce({ content: "feature/add-feature" });
     mockExecute.mockResolvedValueOnce("");
 
-    await branch(false);
+    await branch();
 
     // Should have prompted for confirmation via text()
     expect(mockText).toHaveBeenCalledWith(
@@ -152,6 +167,38 @@ describe("branch", () => {
         message: expect.stringContaining("Should I create the branch"),
       }),
     );
+  });
+
+  it("should exit when user cancels branch description input", async () => {
+    mockExecute.mockResolvedValueOnce("main\n");
+    mockGetBranchInstructionsFromJira.mockResolvedValueOnce(null);
+    mockText.mockResolvedValueOnce(Symbol("cancel"));
+    mockIsCancel.mockReturnValueOnce(true);
+    mockExit.mockImplementationOnce(() => {
+      throw new Error("process.exit");
+    });
+
+    await expect(branch()).rejects.toThrow("process.exit");
+
+    expect(mockCancel).toHaveBeenCalled();
+    expect(mockExit).toHaveBeenCalledWith(0);
+  });
+
+  it("should exit when user cancels branch command confirmation", async () => {
+    mockExecute.mockResolvedValueOnce("main\n");
+    mockGetBranchInstructionsFromJira.mockResolvedValueOnce(null);
+    mockText.mockResolvedValueOnce("add feature");
+    mockInvoke.mockResolvedValueOnce({ content: "feature/add-feature" });
+    mockText.mockResolvedValueOnce(Symbol("cancel"));
+    mockIsCancel.mockReturnValueOnce(false).mockReturnValueOnce(true);
+    mockExit.mockImplementationOnce(() => {
+      throw new Error("process.exit");
+    });
+
+    await expect(branch()).rejects.toThrow("process.exit");
+
+    expect(mockCancel).toHaveBeenCalled();
+    expect(mockExit).toHaveBeenCalledWith(0);
   });
 
   it("should show spinner while LLM is thinking", async () => {
