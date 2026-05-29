@@ -75,6 +75,12 @@ async function commit() {
       process.exit(0);
     }
 
+    if (config.force) {
+      log.info(
+        `👌 Using commit message:\n ${title} \n${commitMessage.description}`,
+      );
+    }
+
     if (shouldAddDescription) {
       await execute(
         `git commit -m "${escapeShell(title)}" -m "${escapeShell(commitMessage.description)}"`,
