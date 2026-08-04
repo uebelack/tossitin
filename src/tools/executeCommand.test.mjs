@@ -1,8 +1,8 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-const mockLog = { info: jest.fn(), error: jest.fn() };
-const mockExecaCommand = jest.fn();
-const mockTool = jest.fn((fn, config) => {
+const mockLog = { info: vi.fn(), error: vi.fn() };
+const mockExecaCommand = vi.fn();
+const mockTool = vi.fn((fn, config) => {
   const wrapper = (input) => fn(input);
   Object.defineProperty(wrapper, "name", { value: config.name });
   wrapper.description = config.description;
@@ -10,28 +10,28 @@ const mockTool = jest.fn((fn, config) => {
   return wrapper;
 });
 
-jest.unstable_mockModule("@langchain/core/tools", () => ({
+vi.doMock("@langchain/core/tools", () => ({
   tool: mockTool,
 }));
 
-jest.unstable_mockModule("execa", () => ({
+vi.doMock("execa", () => ({
   execaCommand: mockExecaCommand,
 }));
 
-jest.unstable_mockModule("@clack/prompts", () => ({
+vi.doMock("@clack/prompts", () => ({
   log: mockLog,
 }));
 
 const mockConfig = { debug: false };
 
-jest.unstable_mockModule("../config.mjs", () => ({
+vi.doMock("../config.mjs", () => ({
   default: mockConfig,
 }));
 
 const { default: executeCommand } = await import("./executeCommand.mjs");
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockConfig.debug = false;
 });
 
@@ -66,9 +66,7 @@ describe("executeCommand", () => {
 
     await executeCommand({ command: "git diff --stat" });
 
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("git diff --stat"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("git diff --stat"));
   });
 
   it("should return error message when command fails with stderr", async () => {
@@ -120,9 +118,7 @@ describe("executeCommand", () => {
 
     await executeCommand({ command: "failing command" });
 
-    expect(mockLog.error).toHaveBeenCalledWith(
-      expect.stringContaining("failing command"),
-    );
+    expect(mockLog.error).toHaveBeenCalledWith(expect.stringContaining("failing command"));
   });
 
   it("should return empty string when command produces no output", async () => {
@@ -149,9 +145,7 @@ describe("executeCommand", () => {
 
     await executeCommand({ command: "git status" });
 
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("debug output"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("debug output"));
   });
 
   it("should log error details when debug is enabled and command fails", async () => {
@@ -164,8 +158,6 @@ describe("executeCommand", () => {
 
     await executeCommand({ command: "bad command" });
 
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("Command error"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("Command error"));
   });
 });

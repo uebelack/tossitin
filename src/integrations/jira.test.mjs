@@ -1,13 +1,13 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-const mockSelect = jest.fn();
-const mockIsCancel = jest.fn(() => false);
-const mockCancel = jest.fn();
-const mockFetch = jest.fn();
+const mockSelect = vi.fn();
+const mockIsCancel = vi.fn(() => false);
+const mockCancel = vi.fn();
+const mockFetch = vi.fn();
 global.fetch = mockFetch;
-const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
+const mockExit = vi.spyOn(process, "exit").mockImplementation(() => {});
 
-jest.unstable_mockModule("@clack/prompts", () => ({
+vi.doMock("@clack/prompts", () => ({
   select: mockSelect,
   isCancel: mockIsCancel,
   cancel: mockCancel,
@@ -21,14 +21,14 @@ const mockConfig = {
   },
 };
 
-jest.unstable_mockModule("../config.mjs", () => ({
+vi.doMock("../config.mjs", () => ({
   default: mockConfig,
 }));
 
 const { getBranchInstructionsFromJira } = await import("./jira.mjs");
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockIsCancel.mockReturnValue(false);
   mockExit.mockImplementation(() => {});
   mockConfig.jira = {
@@ -80,9 +80,7 @@ describe("getBranchInstructionsFromJira", () => {
 
     const result = await getBranchInstructionsFromJira();
 
-    expect(result).toBe(
-      "Key: PROJ-123\nType: Story\nSummary: Implement login page",
-    );
+    expect(result).toBe("Key: PROJ-123\nType: Story\nSummary: Implement login page");
     expect(mockSelect).not.toHaveBeenCalled();
   });
 
@@ -140,9 +138,7 @@ describe("getBranchInstructionsFromJira", () => {
     await getBranchInstructionsFromJira();
 
     expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining(
-        "https://jira.example.com/rest/api/2/search?jql=",
-      ),
+      expect.stringContaining("https://jira.example.com/rest/api/2/search?jql="),
       {
         method: "GET",
         headers: {
@@ -161,9 +157,7 @@ describe("getBranchInstructionsFromJira", () => {
     await getBranchInstructionsFromJira();
 
     const calledUrl = mockFetch.mock.calls[0][0];
-    expect(calledUrl).toContain(
-      encodeURI("assignee = currentUser() AND status = 'In Progress'"),
-    );
+    expect(calledUrl).toContain(encodeURI("assignee = currentUser() AND status = 'In Progress'"));
   });
 
   it("should exit when user cancels issue selection", async () => {
@@ -194,9 +188,7 @@ describe("getBranchInstructionsFromJira", () => {
       throw new Error("process.exit");
     });
 
-    await expect(getBranchInstructionsFromJira()).rejects.toThrow(
-      "process.exit",
-    );
+    await expect(getBranchInstructionsFromJira()).rejects.toThrow("process.exit");
 
     expect(mockCancel).toHaveBeenCalled();
     expect(mockExit).toHaveBeenCalledWith(0);
@@ -211,9 +203,7 @@ describe("getBranchInstructionsFromJira", () => {
     await getBranchInstructionsFromJira();
 
     const calledUrl = mockFetch.mock.calls[0][0];
-    expect(calledUrl).toMatch(
-      /^https:\/\/jira\.example\.com\/rest\/api\/2\/search/,
-    );
+    expect(calledUrl).toMatch(/^https:\/\/jira\.example\.com\/rest\/api\/2\/search/);
     expect(calledUrl).not.toContain("//rest");
   });
 });

@@ -26,7 +26,9 @@ async function add() {
     const s = spinner();
     s.start("🧠 Thinking...");
 
-    const result = await (await llm())
+    const result = await (
+      await llm()
+    )
       .withStructuredOutput(DangerousFiles)
       .invoke([
         new SystemMessage(config.prompts.addPrompt),
@@ -45,9 +47,7 @@ async function add() {
       process.exit(0);
     }
 
-    log.info(
-      `🎉 Adding files:\n\n${filesToAdd.map((file) => `\t👉 ${file}`).join("\n")}`,
-    );
+    log.info(`🎉 Adding files:\n\n${filesToAdd.map((file) => `\t👉 ${file}`).join("\n")}`);
   }
 
   await execute("git add .");

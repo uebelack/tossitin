@@ -1,23 +1,23 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-const mockOutro = jest.fn();
-const mockChatAnthropic = jest.fn();
-const mockChatOllama = jest.fn();
-const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
+const mockOutro = vi.fn();
+const mockChatAnthropic = vi.fn();
+const mockChatOllama = vi.fn();
+const mockExit = vi.spyOn(process, "exit").mockImplementation(() => {});
 
-jest.unstable_mockModule("@clack/prompts", () => ({
+vi.doMock("@clack/prompts", () => ({
   outro: mockOutro,
 }));
 
-jest.unstable_mockModule("@langchain/anthropic", () => ({
+vi.doMock("@langchain/anthropic", () => ({
   ChatAnthropic: mockChatAnthropic,
 }));
 
-jest.unstable_mockModule("@langchain/ollama", () => ({
+vi.doMock("@langchain/ollama", () => ({
   ChatOllama: mockChatOllama,
 }));
 
-jest.unstable_mockModule("./utils/env.mjs", () => ({
+vi.doMock("./utils/env.mjs", () => ({
   default: (key, defaultValue) => process.env[key] || defaultValue,
 }));
 
@@ -26,7 +26,7 @@ const { default: llm } = await import("./llm.mjs");
 const originalEnv = process.env;
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   process.env = { ...originalEnv };
   delete process.env.ANTHROPIC_API_KEY;
   delete process.env.OLLAMA_MODEL;

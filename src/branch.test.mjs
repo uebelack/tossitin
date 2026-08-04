@@ -1,17 +1,17 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-const mockLog = { info: jest.fn() };
-const mockText = jest.fn();
-const mockSpinner = { start: jest.fn(), stop: jest.fn() };
-const mockIsCancel = jest.fn(() => false);
-const mockCancel = jest.fn();
-const mockExecute = jest.fn();
-const mockInvoke = jest.fn();
-const mockLlm = jest.fn(() => ({ invoke: mockInvoke }));
-const mockGetBranchInstructionsFromJira = jest.fn();
-const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
+const mockLog = { info: vi.fn() };
+const mockText = vi.fn();
+const mockSpinner = { start: vi.fn(), stop: vi.fn() };
+const mockIsCancel = vi.fn(() => false);
+const mockCancel = vi.fn();
+const mockExecute = vi.fn();
+const mockInvoke = vi.fn();
+const mockLlm = vi.fn(() => ({ invoke: mockInvoke }));
+const mockGetBranchInstructionsFromJira = vi.fn();
+const mockExit = vi.spyOn(process, "exit").mockImplementation(() => {});
 
-jest.unstable_mockModule("@clack/prompts", () => ({
+vi.doMock("@clack/prompts", () => ({
   log: mockLog,
   text: mockText,
   spinner: () => mockSpinner,
@@ -19,11 +19,11 @@ jest.unstable_mockModule("@clack/prompts", () => ({
   cancel: mockCancel,
 }));
 
-jest.unstable_mockModule("./utils/execute.mjs", () => ({
+vi.doMock("./utils/execute.mjs", () => ({
   default: mockExecute,
 }));
 
-jest.unstable_mockModule("./llm.mjs", () => ({
+vi.doMock("./llm.mjs", () => ({
   default: mockLlm,
 }));
 
@@ -34,18 +34,18 @@ const mockConfig = {
   },
 };
 
-jest.unstable_mockModule("./config.mjs", () => ({
+vi.doMock("./config.mjs", () => ({
   default: mockConfig,
 }));
 
-jest.unstable_mockModule("./integrations/jira.mjs", () => ({
+vi.doMock("./integrations/jira.mjs", () => ({
   getBranchInstructionsFromJira: mockGetBranchInstructionsFromJira,
 }));
 
 const { default: branch } = await import("./branch.mjs");
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockConfig.force = undefined;
   mockIsCancel.mockReturnValue(false);
   mockExit.mockImplementation(() => {});
@@ -62,9 +62,7 @@ describe("branch", () => {
     await branch(false);
 
     expect(mockExecute).toHaveBeenCalledWith("git branch --show-current");
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("not protected"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("not protected"));
     expect(mockLlm).not.toHaveBeenCalled();
   });
 
@@ -78,14 +76,10 @@ describe("branch", () => {
 
     await branch(false);
 
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("protected"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("protected"));
     expect(mockLlm).toHaveBeenCalled();
     expect(mockInvoke).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({ content: "test create branch prompt" }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ content: "test create branch prompt" })]),
     );
     expect(mockText).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -104,17 +98,13 @@ describe("branch", () => {
 
     await branch(false);
 
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("protected"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("protected"));
     expect(mockLlm).toHaveBeenCalled();
   });
 
   it("should use Jira instructions when available", async () => {
     mockExecute.mockResolvedValueOnce("main\n");
-    mockGetBranchInstructionsFromJira.mockResolvedValueOnce(
-      "PROJ-123 implement auth",
-    );
+    mockGetBranchInstructionsFromJira.mockResolvedValueOnce("PROJ-123 implement auth");
     mockInvoke.mockResolvedValueOnce({ content: "feature/PROJ-123-auth" });
     mockText.mockResolvedValueOnce("git checkout -b feature/PROJ-123-auth");
     mockExecute.mockResolvedValueOnce("");
@@ -135,38 +125,14 @@ describe("branch", () => {
     );
   });
 
-  it("should force create branch without confirmation when force is true", async () => {
+  it("should skip the branch check entirely when force is true", async () => {
     mockConfig.force = true;
-    mockExecute.mockResolvedValueOnce("main\n");
-    mockGetBranchInstructionsFromJira.mockResolvedValueOnce(null);
-    mockText.mockResolvedValueOnce("add feature");
-    mockInvoke.mockResolvedValueOnce({ content: "feature/add-feature" });
-    mockExecute.mockResolvedValueOnce("");
 
     await branch();
 
-    expect(mockExecute).toHaveBeenCalledWith(
-      "git checkout -b feature/add-feature",
-    );
-  });
-
-  it("should not force create branch when force is not exactly true", async () => {
-    mockExecute.mockResolvedValueOnce("main\n");
-    mockGetBranchInstructionsFromJira.mockResolvedValueOnce(null);
-    mockText
-      .mockResolvedValueOnce("add feature")
-      .mockResolvedValueOnce("git checkout -b feature/add-feature");
-    mockInvoke.mockResolvedValueOnce({ content: "feature/add-feature" });
-    mockExecute.mockResolvedValueOnce("");
-
-    await branch();
-
-    // Should have prompted for confirmation via text()
-    expect(mockText).toHaveBeenCalledWith(
-      expect.objectContaining({
-        message: expect.stringContaining("Should I create the branch"),
-      }),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("skipping branch check"));
+    expect(mockExecute).not.toHaveBeenCalled();
+    expect(mockLlm).not.toHaveBeenCalled();
   });
 
   it("should exit when user cancels branch description input", async () => {
@@ -212,8 +178,6 @@ describe("branch", () => {
     await branch(false);
 
     expect(mockSpinner.start).toHaveBeenCalled();
-    expect(mockSpinner.stop).toHaveBeenCalledWith(
-      expect.stringContaining("feature/new-feature"),
-    );
+    expect(mockSpinner.stop).toHaveBeenCalledWith(expect.stringContaining("feature/new-feature"));
   });
 });

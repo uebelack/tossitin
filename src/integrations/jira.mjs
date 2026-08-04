@@ -2,9 +2,7 @@ import config from "../config.mjs";
 import { select, isCancel, cancel } from "@clack/prompts";
 
 function getUrl(endpoint) {
-  const url = config.jira.url.endsWith("/")
-    ? config.jira.url.slice(0, -1)
-    : config.jira.url;
+  const url = config.jira.url.endsWith("/") ? config.jira.url.slice(0, -1) : config.jira.url;
   /* istanbul ignore next -- endpoint always starts with "/" internally */
   return `${url}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
 }

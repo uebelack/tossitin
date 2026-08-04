@@ -87,7 +87,7 @@ tossitin --force
 
 ### What it does
 
-1. **Branch check** — If the current branch is protected (`main`, `master`, `develop`, `release/*`, etc.), it prompts you to describe your work and creates a new branch with an AI-generated name.
+1. **Branch check** — If the current branch is protected (`main`, `master`, `develop`, `release/*`, etc.), it prompts you to describe your work and creates a new branch with an AI-generated name. Skipped entirely with `--force`, which commits on the current branch.
 2. **Stage files** — Runs `git add .`, but first scans any new untracked files with AI. If a file looks dangerous (e.g., contains secrets or credentials), it stops and warns you before anything is staged.
 3. **Generate commit message** — An AI agent runs `git status` and `git diff --cached` to understand your changes, then writes a commit message with a subject line and description.
 4. **Confirm and commit** — Shows you the message and asks for confirmation (auto-approved with `--force`).
@@ -156,16 +156,16 @@ export default {
 ```bash
 git clone https://github.com/uebelack/tossitin.git
 cd tossitin
-yarn install
+pnpm install
 
 # Run directly
 node index.mjs
 
 # Run tests
-yarn test
+pnpm test
 
 # Lint
-yarn lint:check
+pnpm lint:check
 ```
 
 ## Troubleshooting

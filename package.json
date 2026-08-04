@@ -1,67 +1,51 @@
 {
   "name": "tossitin",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Generate git commit messages using a LangGraph workflow that inspects repo state and commits changes",
-  "main": "index.mjs",
-  "type": "module",
-  "bin": "./index.mjs",
   "keywords": [
-    "git",
-    "commit",
     "ai",
-    "langchain",
-    "claude",
     "anthropic",
-    "automation"
+    "automation",
+    "claude",
+    "commit",
+    "git",
+    "langchain"
   ],
-  "author": "David Übelacker",
   "license": "MIT",
-  "engines": {
-    "node": ">=22.0.0"
-  },
-  "scripts": {
-    "lint:check": "eslint .",
-    "lint:fix": "eslint --fix .",
-    "format:check": "prettier --check .",
-    "format:write": "prettier --write .",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
-  },
+  "author": "David Übelacker",
   "repository": {
     "type": "git",
     "url": "https://github.com/uebelack/tossitin"
   },
-  "packageManager": "yarn@4.12.0",
-  "jest": {
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "**/*.mjs"
-    ],
-    "coverageThreshold": {
-      "global": {
-        "branches": 100,
-        "functions": 100,
-        "lines": 100,
-        "statements": 100
-      }
-    }
+  "bin": "./index.mjs",
+  "type": "module",
+  "main": "index.mjs",
+  "scripts": {
+    "lint:check": "oxlint",
+    "lint:fix": "oxlint --fix",
+    "format:check": "oxfmt --check .",
+    "format:write": "oxfmt .",
+    "test": "vitest run"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
-    "@langchain/anthropic": "^1.3.17",
-    "@langchain/core": "^1.1.24",
-    "@langchain/ollama": "^1.2.2",
-    "execa": "^9.6.0",
-    "langchain": "^1.2.24",
-    "yargs": "^18.0.0"
+    "@langchain/anthropic": "^1.5.2",
+    "@langchain/core": "^1.2.4",
+    "@langchain/ollama": "^1.3.0",
+    "execa": "^9.6.1",
+    "langchain": "^1.5.4",
+    "yargs": "^18.1.0",
+    "zod": "4.4.3"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@eslint/json": "^1.0.0",
-    "@eslint/markdown": "^7.5.1",
-    "eslint": "^10.0.0",
-    "globals": "^17.3.0",
-    "jest": "^30.2.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.3"
-  }
+    "@vitest/coverage-istanbul": "^4.1.10",
+    "oxfmt": "^0.61.0",
+    "oxlint": "^1.76.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "pnpm@11.9.0"
 }

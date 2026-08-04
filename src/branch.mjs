@@ -37,43 +37,40 @@ async function createNewBranch() {
 
   const result = await llm().invoke([
     new SystemMessage(config.prompts.createBranch),
-    new HumanMessage(
-      `Create a git branch name with the following instructions: ${instructions}`,
-    ),
+    new HumanMessage(`Create a git branch name with the following instructions: ${instructions}`),
   ]);
 
   const newBranchName = extractResult(result);
 
   s.stop(`👌 Perfect branch name: ${newBranchName}`);
 
-  if (config.force == true) {
-    await execute(`git checkout -b ${newBranchName}`);
-  } else {
-    const command = await text({
-      message: "Should I create the branch and execute this command?",
-      initialValue: `git checkout -b ${newBranchName}`,
-    });
+  const command = await text({
+    message: "Should I create the branch and execute this command?",
+    initialValue: `git checkout -b ${newBranchName}`,
+  });
 
-    if (isCancel(command)) {
-      cancel("❌ Cancelled.");
-      process.exit(0);
-    }
-
-    await execute(command);
+  if (isCancel(command)) {
+    cancel("❌ Cancelled.");
+    process.exit(0);
   }
+
+  await execute(command);
 
   return newBranchName;
 }
 
-async function branch(force) {
+async function branch() {
+  if (config.force === true) {
+    log.info(`⚡ Force mode enabled, skipping branch check...`);
+    return;
+  }
+
   var currentBranchName = (await execute("git branch --show-current")).trim();
 
   if (isBranchProtected(currentBranchName)) {
-    await createNewBranch(force);
+    await createNewBranch();
   } else {
-    log.info(
-      `✅ Current branch "${currentBranchName}" is not protected, let's continue...`,
-    );
+    log.info(`✅ Current branch "${currentBranchName}" is not protected, let's continue...`);
   }
 }
 

@@ -1,15 +1,15 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-const mockExecaCommand = jest.fn();
+const mockExecaCommand = vi.fn();
 
-jest.unstable_mockModule("execa", () => ({
+vi.doMock("execa", () => ({
   execaCommand: mockExecaCommand,
 }));
 
 const { default: execute } = await import("./execute.mjs");
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe("execute", () => {

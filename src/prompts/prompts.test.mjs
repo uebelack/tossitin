@@ -14,18 +14,15 @@ describe("prompts", () => {
   });
 
   it("should export createBranchPrompt as a non-empty string", async () => {
-    const { default: createBranchPrompt } = await import(
-      "./createBranchPrompt.mjs"
-    );
+    const { default: createBranchPrompt } = await import("./createBranchPrompt.mjs");
 
     expect(typeof createBranchPrompt).toBe("string");
     expect(createBranchPrompt.length).toBeGreaterThan(0);
   });
 
   it("should export extractCommitMessagePrompt as a non-empty string", async () => {
-    const { default: extractCommitMessagePrompt } = await import(
-      "./extractCommitMessagePrompt.mjs"
-    );
+    const { default: extractCommitMessagePrompt } =
+      await import("./extractCommitMessagePrompt.mjs");
 
     expect(typeof extractCommitMessagePrompt).toBe("string");
     expect(extractCommitMessagePrompt.length).toBeGreaterThan(0);

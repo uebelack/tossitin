@@ -52,10 +52,7 @@ describe("extractResult", () => {
 
   it("should handle think tags in messages format", () => {
     const result = {
-      messages: [
-        { content: "earlier" },
-        { content: "<think>reasoning</think>final answer" },
-      ],
+      messages: [{ content: "earlier" }, { content: "<think>reasoning</think>final answer" }],
     };
 
     expect(extractResult(result)).toBe("final answer");

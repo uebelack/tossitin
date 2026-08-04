@@ -1,33 +1,33 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-const mockIntro = jest.fn();
-const mockOutro = jest.fn();
-const mockBranch = jest.fn();
-const mockAdd = jest.fn();
-const mockCommit = jest.fn();
-const mockPush = jest.fn();
+const mockIntro = vi.fn();
+const mockOutro = vi.fn();
+const mockBranch = vi.fn();
+const mockAdd = vi.fn();
+const mockCommit = vi.fn();
+const mockPush = vi.fn();
 
-const mockLog = { info: jest.fn() };
+const mockLog = { info: vi.fn() };
 
-jest.unstable_mockModule("@clack/prompts", () => ({
+vi.doMock("@clack/prompts", () => ({
   intro: mockIntro,
   outro: mockOutro,
   log: mockLog,
 }));
 
-jest.unstable_mockModule("./src/branch.mjs", () => ({
+vi.doMock("./src/branch.mjs", () => ({
   default: mockBranch,
 }));
 
-jest.unstable_mockModule("./src/add.mjs", () => ({
+vi.doMock("./src/add.mjs", () => ({
   default: mockAdd,
 }));
 
-jest.unstable_mockModule("./src/commit.mjs", () => ({
+vi.doMock("./src/commit.mjs", () => ({
   default: mockCommit,
 }));
 
-jest.unstable_mockModule("./src/push.mjs", () => ({
+vi.doMock("./src/push.mjs", () => ({
   default: mockPush,
 }));
 
@@ -36,12 +36,12 @@ const mockConfig = {
   debug: false,
 };
 
-jest.unstable_mockModule("./src/config.mjs", () => ({
+vi.doMock("./src/config.mjs", () => ({
   default: mockConfig,
 }));
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockConfig.force = false;
   mockConfig.debug = false;
 });
@@ -60,9 +60,7 @@ describe("index", () => {
     expect(mockAdd).toHaveBeenCalled();
     expect(mockCommit).toHaveBeenCalled();
     expect(mockPush).toHaveBeenCalled();
-    expect(mockOutro).toHaveBeenCalledWith(
-      expect.stringContaining("committed and pushed"),
-    );
+    expect(mockOutro).toHaveBeenCalledWith(expect.stringContaining("committed and pushed"));
   });
 
   it("should log debug info when debug mode is enabled", async () => {
@@ -72,15 +70,10 @@ describe("index", () => {
     mockCommit.mockResolvedValueOnce();
     mockPush.mockResolvedValueOnce();
 
-    await jest.isolateModulesAsync(async () => {
-      await import("./index.mjs");
-    });
+    vi.resetModules();
+    await import("./index.mjs");
 
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("Debug mode enabled"),
-    );
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("Current configuration"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("Debug mode enabled"));
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("Current configuration"));
   });
 });

@@ -39,7 +39,9 @@ async function commit() {
     const s = spinner();
     s.start("🧠 Thinking...");
 
-    const commitMessage = await (await llm())
+    const commitMessage = await (
+      await llm()
+    )
       .withStructuredOutput(CommitMessage)
       .invoke([
         new SystemMessage(config.prompts.extractCommitMessagePrompt),
@@ -66,8 +68,7 @@ async function commit() {
       config.force ||
       (await confirm({
         message:
-          "Should I add this description to the commit message?\n\n" +
-          commitMessage.description,
+          "Should I add this description to the commit message?\n\n" + commitMessage.description,
       }));
 
     if (isCancel(shouldAddDescription)) {
@@ -76,9 +77,7 @@ async function commit() {
     }
 
     if (config.force) {
-      log.info(
-        `👌 Using commit message:\n ${title} \n${commitMessage.description}`,
-      );
+      log.info(`👌 Using commit message:\n ${title} \n${commitMessage.description}`);
     }
 
     if (shouldAddDescription) {

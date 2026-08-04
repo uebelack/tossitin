@@ -1,31 +1,31 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-const mockLog = { info: jest.fn(), error: jest.fn() };
-const mockSpinner = { start: jest.fn(), stop: jest.fn() };
-const mockOutro = jest.fn();
-const mockExecute = jest.fn();
-const mockInvoke = jest.fn();
-const mockWithStructuredOutput = jest.fn(() => ({ invoke: mockInvoke }));
-const mockLlm = jest.fn(() => ({
+const mockLog = { info: vi.fn(), error: vi.fn() };
+const mockSpinner = { start: vi.fn(), stop: vi.fn() };
+const mockOutro = vi.fn();
+const mockExecute = vi.fn();
+const mockInvoke = vi.fn();
+const mockWithStructuredOutput = vi.fn(() => ({ invoke: mockInvoke }));
+const mockLlm = vi.fn(() => ({
   withStructuredOutput: mockWithStructuredOutput,
 }));
-const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
+const mockExit = vi.spyOn(process, "exit").mockImplementation(() => {});
 
-jest.unstable_mockModule("@clack/prompts", () => ({
+vi.doMock("@clack/prompts", () => ({
   log: mockLog,
   spinner: () => mockSpinner,
   outro: mockOutro,
 }));
 
-jest.unstable_mockModule("./utils/execute.mjs", () => ({
+vi.doMock("./utils/execute.mjs", () => ({
   default: mockExecute,
 }));
 
-jest.unstable_mockModule("./llm.mjs", () => ({
+vi.doMock("./llm.mjs", () => ({
   default: mockLlm,
 }));
 
-jest.unstable_mockModule("./config.mjs", () => ({
+vi.doMock("./config.mjs", () => ({
   default: {
     prompts: {
       addPrompt: "test add prompt",
@@ -36,7 +36,7 @@ jest.unstable_mockModule("./config.mjs", () => ({
 const { default: add } = await import("./add.mjs");
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockExit.mockImplementation(() => {});
 });
 
@@ -84,9 +84,7 @@ describe("add", () => {
     );
     expect(mockSpinner.start).toHaveBeenCalled();
     expect(mockSpinner.stop).toHaveBeenCalled();
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("newfile.txt"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("newfile.txt"));
     expect(mockExecute).toHaveBeenCalledWith("git add .");
   });
 
@@ -99,28 +97,20 @@ describe("add", () => {
     await add();
 
     expect(mockLog.error).toHaveBeenCalledWith(expect.stringContaining(".env"));
-    expect(mockLog.error).toHaveBeenCalledWith(
-      expect.stringContaining("Contains secrets"),
-    );
-    expect(mockOutro).toHaveBeenCalledWith(
-      expect.stringContaining(".gitignore"),
-    );
+    expect(mockLog.error).toHaveBeenCalledWith(expect.stringContaining("Contains secrets"));
+    expect(mockOutro).toHaveBeenCalledWith(expect.stringContaining(".gitignore"));
     expect(mockExit).toHaveBeenCalledWith(0);
   });
 
   it("should only pick lines starting with ?? as untracked files", async () => {
-    mockExecute.mockResolvedValueOnce(
-      "M  modified.txt\n?? untracked.txt\nA  added.txt",
-    );
+    mockExecute.mockResolvedValueOnce("M  modified.txt\n?? untracked.txt\nA  added.txt");
     mockExecute.mockResolvedValueOnce("");
     mockInvoke.mockResolvedValueOnce({ dangerousFiles: [] });
 
     await add({});
 
     expect(mockInvoke).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({ content: "untracked.txt" }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ content: "untracked.txt" })]),
     );
   });
 });

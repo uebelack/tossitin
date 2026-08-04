@@ -22,9 +22,7 @@ const executeCommand = tool(
       return result;
     } catch (error) {
       log.error(`Command failed: ${command}`);
-      const errorMessage = `Command failed with exit code ${
-        error.exitCode
-      }: ${command}\n\nError: ${
+      const errorMessage = `Command failed with exit code ${error.exitCode}: ${command}\n\nError: ${
         error.stderr || error.message
       }\n\nTip: If using git commands with options and file paths, make sure options (like --stat) come before file paths (like index.mjs).`;
 

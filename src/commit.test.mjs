@@ -1,25 +1,25 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-const mockLog = { info: jest.fn() };
-const mockConfirm = jest.fn();
-const mockText = jest.fn();
-const mockSpinner = { start: jest.fn(), stop: jest.fn() };
-const mockIsCancel = jest.fn(() => false);
-const mockCancel = jest.fn();
-const mockExecute = jest.fn();
-const mockAgentInvoke = jest.fn();
-const mockCreateAgent = jest.fn(() => ({ invoke: mockAgentInvoke }));
-const mockStructuredInvoke = jest.fn();
-const mockWithStructuredOutput = jest.fn(() => ({
+const mockLog = { info: vi.fn() };
+const mockConfirm = vi.fn();
+const mockText = vi.fn();
+const mockSpinner = { start: vi.fn(), stop: vi.fn() };
+const mockIsCancel = vi.fn(() => false);
+const mockCancel = vi.fn();
+const mockExecute = vi.fn();
+const mockAgentInvoke = vi.fn();
+const mockCreateAgent = vi.fn(() => ({ invoke: mockAgentInvoke }));
+const mockStructuredInvoke = vi.fn();
+const mockWithStructuredOutput = vi.fn(() => ({
   invoke: mockStructuredInvoke,
 }));
 const mockLlmInstance = { withStructuredOutput: mockWithStructuredOutput };
-const mockLlm = jest.fn(() => mockLlmInstance);
+const mockLlm = vi.fn(() => mockLlmInstance);
 const mockExecuteCommand = "mock-execute-command-tool";
-const mockExtractResult = jest.fn();
-const mockExit = jest.spyOn(process, "exit").mockImplementation(() => {});
+const mockExtractResult = vi.fn();
+const mockExit = vi.spyOn(process, "exit").mockImplementation(() => {});
 
-jest.unstable_mockModule("@clack/prompts", () => ({
+vi.doMock("@clack/prompts", () => ({
   log: mockLog,
   confirm: mockConfirm,
   text: mockText,
@@ -28,19 +28,19 @@ jest.unstable_mockModule("@clack/prompts", () => ({
   cancel: mockCancel,
 }));
 
-jest.unstable_mockModule("./utils/execute.mjs", () => ({
+vi.doMock("./utils/execute.mjs", () => ({
   default: mockExecute,
 }));
 
-jest.unstable_mockModule("./llm.mjs", () => ({
+vi.doMock("./llm.mjs", () => ({
   default: mockLlm,
 }));
 
-jest.unstable_mockModule("langchain", () => ({
+vi.doMock("langchain", () => ({
   createAgent: mockCreateAgent,
 }));
 
-jest.unstable_mockModule("./tools/executeCommand.mjs", () => ({
+vi.doMock("./tools/executeCommand.mjs", () => ({
   default: mockExecuteCommand,
 }));
 
@@ -51,18 +51,18 @@ const mockConfig = {
   },
 };
 
-jest.unstable_mockModule("./config.mjs", () => ({
+vi.doMock("./config.mjs", () => ({
   default: mockConfig,
 }));
 
-jest.unstable_mockModule("./utils/extractResult.mjs", () => ({
+vi.doMock("./utils/extractResult.mjs", () => ({
   default: mockExtractResult,
 }));
 
 const { default: commit } = await import("./commit.mjs");
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
   mockExit.mockImplementation(() => {});
   mockIsCancel.mockReturnValue(false);
   mockConfig.force = undefined;
@@ -78,9 +78,7 @@ describe("commit", () => {
 
     await commit();
 
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("No files to commit"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("No files to commit"));
     expect(mockExit).toHaveBeenCalledWith(0);
     expect(mockCreateAgent).not.toHaveBeenCalled();
   });
@@ -147,9 +145,7 @@ describe("commit", () => {
 
     await commit();
 
-    expect(mockExecute).toHaveBeenCalledWith(
-      'git commit -m "feat: add new feature"',
-    );
+    expect(mockExecute).toHaveBeenCalledWith('git commit -m "feat: add new feature"');
   });
 
   it("should commit with title and description when user confirms", async () => {
@@ -246,15 +242,11 @@ describe("commit", () => {
 
     await commit();
 
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("Creating commit message"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("Creating commit message"));
   });
 
   it("should filter out untracked files and parse filenames correctly", async () => {
-    mockExecute.mockResolvedValueOnce(
-      "M  modified.txt\n?? untracked.txt\nA  added.txt",
-    );
+    mockExecute.mockResolvedValueOnce("M  modified.txt\n?? untracked.txt\nA  added.txt");
     mockAgentInvoke.mockResolvedValueOnce({ content: "raw output" });
     mockExtractResult.mockReturnValueOnce("raw output");
     mockStructuredInvoke.mockResolvedValueOnce({
@@ -269,18 +261,13 @@ describe("commit", () => {
 
     // Should proceed since there are tracked files (M and A)
     expect(mockCreateAgent).toHaveBeenCalled();
-    expect(mockExecute).toHaveBeenCalledWith(
-      'git commit -m "chore: cleanup" -m "Cleaned up"',
-    );
+    expect(mockExecute).toHaveBeenCalledWith('git commit -m "chore: cleanup" -m "Cleaned up"');
   });
 
   it("should use extractResult to process agent output", async () => {
     mockExecute.mockResolvedValueOnce("M  file.txt");
     mockAgentInvoke.mockResolvedValueOnce({
-      messages: [
-        { content: "thinking..." },
-        { content: "fix: correct extraction" },
-      ],
+      messages: [{ content: "thinking..." }, { content: "fix: correct extraction" }],
     });
     mockExtractResult.mockReturnValueOnce("fix: correct extraction");
     mockStructuredInvoke.mockResolvedValueOnce({
@@ -294,9 +281,7 @@ describe("commit", () => {
     await commit();
 
     expect(mockExtractResult).toHaveBeenCalled();
-    expect(mockExecute).toHaveBeenCalledWith(
-      'git commit -m "fix: correct extraction"',
-    );
+    expect(mockExecute).toHaveBeenCalledWith('git commit -m "fix: correct extraction"');
   });
 
   it("should escape special characters in commit messages", async () => {

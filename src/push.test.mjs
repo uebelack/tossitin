@@ -1,20 +1,20 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-const mockLog = { info: jest.fn() };
-const mockExecute = jest.fn();
+const mockLog = { info: vi.fn() };
+const mockExecute = vi.fn();
 
-jest.unstable_mockModule("@clack/prompts", () => ({
+vi.doMock("@clack/prompts", () => ({
   log: mockLog,
 }));
 
-jest.unstable_mockModule("./utils/execute.mjs", () => ({
+vi.doMock("./utils/execute.mjs", () => ({
   default: mockExecute,
 }));
 
 const { default: push } = await import("./push.mjs");
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe("push", () => {
@@ -24,12 +24,8 @@ describe("push", () => {
     await push();
 
     expect(mockExecute).toHaveBeenCalledWith("git push");
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("Pushing to remote"),
-    );
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("Pushed to remote"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("Pushing to remote"));
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("Pushed to remote"));
   });
 
   it("should set upstream and push when git push fails", async () => {
@@ -41,9 +37,7 @@ describe("push", () => {
 
     expect(mockExecute).toHaveBeenCalledWith("git push");
     expect(mockExecute).toHaveBeenCalledWith("git rev-parse --abbrev-ref HEAD");
-    expect(mockExecute).toHaveBeenCalledWith(
-      "git push --set-upstream origin feature/my-branch",
-    );
+    expect(mockExecute).toHaveBeenCalledWith("git push --set-upstream origin feature/my-branch");
   });
 
   it("should log upstream message when setting upstream", async () => {
@@ -53,12 +47,8 @@ describe("push", () => {
 
     await push();
 
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("No upstream branch"),
-    );
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("origin/develop"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("No upstream branch"));
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("origin/develop"));
   });
 
   it("should log pushed message after setting upstream", async () => {
@@ -68,9 +58,7 @@ describe("push", () => {
 
     await push();
 
-    expect(mockLog.info).toHaveBeenLastCalledWith(
-      expect.stringContaining("Pushed to remote"),
-    );
+    expect(mockLog.info).toHaveBeenLastCalledWith(expect.stringContaining("Pushed to remote"));
   });
 
   it("should propagate error if set-upstream push also fails", async () => {

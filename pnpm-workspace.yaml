@@ -1,0 +1,6 @@
+minimumReleaseAgeExclude:
+  - "@rolldown/binding-android-arm64@1.2.2"
+  - "@rolldown/binding-linux-arm-gnueabihf@1.2.2"
+  - "@rolldown/binding-linux-arm64-musl@1.2.2"
+  - "@rolldown/binding-linux-s390x-gnu@1.2.2"
+  - "@rolldown/binding-linux-x64-musl@1.2.2"

@@ -18,9 +18,7 @@ describe("escapeShell", () => {
   });
 
   it("should escape multiple special characters", () => {
-    expect(escapeShell('say "hello" to $user `now`')).toBe(
-      'say \\"hello\\" to \\$user \\`now\\`',
-    );
+    expect(escapeShell('say "hello" to $user `now`')).toBe('say \\"hello\\" to \\$user \\`now\\`');
   });
 
   it("should return the string unchanged when no special characters", () => {

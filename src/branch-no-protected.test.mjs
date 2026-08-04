@@ -1,30 +1,30 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 
-const mockLog = { info: jest.fn() };
-const mockText = jest.fn();
-const mockSpinner = { start: jest.fn(), stop: jest.fn() };
-const mockExecute = jest.fn();
-const mockInvoke = jest.fn();
-const mockLlm = jest.fn(() => ({ invoke: mockInvoke }));
-const mockGetBranchInstructionsFromJira = jest.fn();
+const mockLog = { info: vi.fn() };
+const mockText = vi.fn();
+const mockSpinner = { start: vi.fn(), stop: vi.fn() };
+const mockExecute = vi.fn();
+const mockInvoke = vi.fn();
+const mockLlm = vi.fn(() => ({ invoke: mockInvoke }));
+const mockGetBranchInstructionsFromJira = vi.fn();
 
-jest.unstable_mockModule("@clack/prompts", () => ({
+vi.doMock("@clack/prompts", () => ({
   log: mockLog,
   text: mockText,
   spinner: () => mockSpinner,
-  isCancel: jest.fn(() => false),
-  cancel: jest.fn(),
+  isCancel: vi.fn(() => false),
+  cancel: vi.fn(),
 }));
 
-jest.unstable_mockModule("./utils/execute.mjs", () => ({
+vi.doMock("./utils/execute.mjs", () => ({
   default: mockExecute,
 }));
 
-jest.unstable_mockModule("./llm.mjs", () => ({
+vi.doMock("./llm.mjs", () => ({
   default: mockLlm,
 }));
 
-jest.unstable_mockModule("./config.mjs", () => ({
+vi.doMock("./config.mjs", () => ({
   default: {
     prompts: {
       createBranch: "test create branch prompt",
@@ -32,14 +32,14 @@ jest.unstable_mockModule("./config.mjs", () => ({
   },
 }));
 
-jest.unstable_mockModule("./integrations/jira.mjs", () => ({
+vi.doMock("./integrations/jira.mjs", () => ({
   getBranchInstructionsFromJira: mockGetBranchInstructionsFromJira,
 }));
 
 const { default: branch } = await import("./branch.mjs");
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe("branch with no protectedBranches config", () => {
@@ -48,9 +48,7 @@ describe("branch with no protectedBranches config", () => {
 
     await branch(false);
 
-    expect(mockLog.info).toHaveBeenCalledWith(
-      expect.stringContaining("not protected"),
-    );
+    expect(mockLog.info).toHaveBeenCalledWith(expect.stringContaining("not protected"));
     expect(mockLlm).not.toHaveBeenCalled();
   });
 });

@@ -1,4 +1,4 @@
-import { jest } from "@jest/globals";
+import { vi } from "vitest";
 import fs from "fs";
 import path from "path";
 
@@ -8,16 +8,13 @@ const homeConfigPath = path.join(homeConfigDir, "config.mjs");
 const homeConfigExisted = fs.existsSync(homeConfigPath);
 
 beforeEach(() => {
-  jest.resetModules();
+  vi.resetModules();
 });
 
 afterAll(() => {
   if (!homeConfigExisted) {
     if (fs.existsSync(homeConfigPath)) fs.unlinkSync(homeConfigPath);
-    if (
-      fs.existsSync(homeConfigDir) &&
-      fs.readdirSync(homeConfigDir).length === 0
-    ) {
+    if (fs.existsSync(homeConfigDir) && fs.readdirSync(homeConfigDir).length === 0) {
       fs.rmdirSync(homeConfigDir);
     }
   }
@@ -25,31 +22,26 @@ afterAll(() => {
 
 describe("config", () => {
   it("should export default config when no config files exist", async () => {
-    jest.unstable_mockModule("fs", () => ({
+    vi.doMock("fs", () => ({
       default: { existsSync: () => false },
     }));
-    jest.unstable_mockModule("./prompts/createBranchPrompt.mjs", () => ({
+    vi.doMock("./prompts/createBranchPrompt.mjs", () => ({
       default: "mock create branch prompt",
     }));
-    jest.unstable_mockModule("./prompts/addPrompt.mjs", () => ({
+    vi.doMock("./prompts/addPrompt.mjs", () => ({
       default: "mock add prompt",
     }));
-    jest.unstable_mockModule("./prompts/commitPrompt.mjs", () => ({
+    vi.doMock("./prompts/commitPrompt.mjs", () => ({
       default: "mock commit prompt",
     }));
-    jest.unstable_mockModule(
-      "./prompts/extractCommitMessagePrompt.mjs",
-      () => ({
-        default: "mock extract commit message prompt",
-      }),
-    );
+    vi.doMock("./prompts/extractCommitMessagePrompt.mjs", () => ({
+      default: "mock extract commit message prompt",
+    }));
 
     const { default: config } = await import("./config.mjs");
 
     expect(config.force).toBe(false);
-    expect(config.protectedBranches).toEqual(
-      expect.arrayContaining(["main", "master", "develop"]),
-    );
+    expect(config.protectedBranches).toEqual(expect.arrayContaining(["main", "master", "develop"]));
     expect(config.prompts).toEqual({
       createBranch: "mock create branch prompt",
       addPrompt: "mock add prompt",
@@ -62,7 +54,7 @@ describe("config", () => {
     const cwd = process.cwd();
     const checkedPaths = [];
 
-    jest.unstable_mockModule("fs", () => ({
+    vi.doMock("fs", () => ({
       default: {
         existsSync: (p) => {
           checkedPaths.push(p);
@@ -70,21 +62,18 @@ describe("config", () => {
         },
       },
     }));
-    jest.unstable_mockModule("./prompts/createBranchPrompt.mjs", () => ({
+    vi.doMock("./prompts/createBranchPrompt.mjs", () => ({
       default: "prompt",
     }));
-    jest.unstable_mockModule("./prompts/addPrompt.mjs", () => ({
+    vi.doMock("./prompts/addPrompt.mjs", () => ({
       default: "prompt",
     }));
-    jest.unstable_mockModule("./prompts/commitPrompt.mjs", () => ({
+    vi.doMock("./prompts/commitPrompt.mjs", () => ({
       default: "prompt",
     }));
-    jest.unstable_mockModule(
-      "./prompts/extractCommitMessagePrompt.mjs",
-      () => ({
-        default: "prompt",
-      }),
-    );
+    vi.doMock("./prompts/extractCommitMessagePrompt.mjs", () => ({
+      default: "prompt",
+    }));
 
     await import("./config.mjs");
 
