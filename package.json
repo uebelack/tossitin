@@ -1,6 +1,6 @@
 {
   "name": "tossitin",
-  "version": "2.1.0",
+  "version": "3.0.0",
   "description": "Generate git commit messages using a LangGraph workflow that inspects repo state and commits changes",
   "keywords": [
     "ai",
