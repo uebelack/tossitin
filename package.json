@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@vitest/coverage-istanbul": "^4.1.12",
-    "oxfmt": "^0.61.0",
+    "oxfmt": "^0.78.0",
     "oxlint": "^1.93.0",
     "vitest": "^4.1.12"
   },
