@@ -1,5 +1,5 @@
 import { tool } from "@langchain/core/tools";
-import { execaCommand } from "execa";
+import { execa } from "execa";
 import { log } from "@clack/prompts";
 import config from "../config.mjs";
 
@@ -7,7 +7,7 @@ const executeCommand = tool(
   async ({ command }) => {
     log.info(`Executing command: ${command}`);
     try {
-      const { all } = await execaCommand(command, { shell: true, all: true });
+      const { all } = await execa(command, { shell: true, all: true });
 
       let result = all.trim();
 

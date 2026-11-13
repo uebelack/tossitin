@@ -1,9 +1,9 @@
 import { vi } from "vitest";
 
-const mockExecaCommand = vi.fn();
+const mockExeca = vi.fn();
 
 vi.doMock("execa", () => ({
-  execaCommand: mockExecaCommand,
+  execa: mockExeca,
 }));
 
 const { default: execute } = await import("./execute.mjs");
@@ -13,19 +13,19 @@ beforeEach(() => {
 });
 
 describe("execute", () => {
-  it("should call execaCommand with shell and all options", async () => {
-    mockExecaCommand.mockResolvedValueOnce({ all: "output" });
+  it("should call execa with shell and all options", async () => {
+    mockExeca.mockResolvedValueOnce({ all: "output" });
 
     await execute("git status");
 
-    expect(mockExecaCommand).toHaveBeenCalledWith("git status", {
+    expect(mockExeca).toHaveBeenCalledWith("git status", {
       shell: true,
       all: true,
     });
   });
 
   it("should return the all property from the result", async () => {
-    mockExecaCommand.mockResolvedValueOnce({ all: "combined output" });
+    mockExeca.mockResolvedValueOnce({ all: "combined output" });
 
     const result = await execute("echo hello");
 
@@ -33,15 +33,15 @@ describe("execute", () => {
   });
 
   it("should return empty string when command produces no output", async () => {
-    mockExecaCommand.mockResolvedValueOnce({ all: "" });
+    mockExeca.mockResolvedValueOnce({ all: "" });
 
     const result = await execute("git add .");
 
     expect(result).toBe("");
   });
 
-  it("should propagate errors from execaCommand", async () => {
-    mockExecaCommand.mockRejectedValueOnce(new Error("command failed"));
+  it("should propagate errors from execa", async () => {
+    mockExeca.mockRejectedValueOnce(new Error("command failed"));
 
     await expect(execute("bad command")).rejects.toThrow("command failed");
   });

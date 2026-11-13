@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 
 const mockLog = { info: vi.fn(), error: vi.fn() };
-const mockExecaCommand = vi.fn();
+const mockExeca = vi.fn();
 const mockTool = vi.fn((fn, config) => {
   const wrapper = (input) => fn(input);
   Object.defineProperty(wrapper, "name", { value: config.name });
@@ -15,7 +15,7 @@ vi.doMock("@langchain/core/tools", () => ({
 }));
 
 vi.doMock("execa", () => ({
-  execaCommand: mockExecaCommand,
+  execa: mockExeca,
 }));
 
 vi.doMock("@clack/prompts", () => ({
@@ -50,11 +50,11 @@ describe("executeCommand", () => {
   });
 
   it("should execute command and return output", async () => {
-    mockExecaCommand.mockResolvedValueOnce({ all: "command output" });
+    mockExeca.mockResolvedValueOnce({ all: "command output" });
 
     const result = await executeCommand({ command: "git status" });
 
-    expect(mockExecaCommand).toHaveBeenCalledWith("git status", {
+    expect(mockExeca).toHaveBeenCalledWith("git status", {
       shell: true,
       all: true,
     });
@@ -62,7 +62,7 @@ describe("executeCommand", () => {
   });
 
   it("should log the command being executed", async () => {
-    mockExecaCommand.mockResolvedValueOnce({ all: "" });
+    mockExeca.mockResolvedValueOnce({ all: "" });
 
     await executeCommand({ command: "git diff --stat" });
 
@@ -70,7 +70,7 @@ describe("executeCommand", () => {
   });
 
   it("should return error message when command fails with stderr", async () => {
-    mockExecaCommand.mockRejectedValueOnce({
+    mockExeca.mockRejectedValueOnce({
       exitCode: 128,
       stderr: "fatal: not a git repository",
       message: "Command failed",
@@ -83,7 +83,7 @@ describe("executeCommand", () => {
   });
 
   it("should fall back to error.message when stderr is empty", async () => {
-    mockExecaCommand.mockRejectedValueOnce({
+    mockExeca.mockRejectedValueOnce({
       exitCode: 1,
       stderr: "",
       message: "Something went wrong",
@@ -95,7 +95,7 @@ describe("executeCommand", () => {
   });
 
   it("should include tip about git options in error message", async () => {
-    mockExecaCommand.mockRejectedValueOnce({
+    mockExeca.mockRejectedValueOnce({
       exitCode: 1,
       stderr: "error",
       message: "failed",
@@ -110,7 +110,7 @@ describe("executeCommand", () => {
   });
 
   it("should log error when command fails", async () => {
-    mockExecaCommand.mockRejectedValueOnce({
+    mockExeca.mockRejectedValueOnce({
       exitCode: 1,
       stderr: "error",
       message: "failed",
@@ -122,7 +122,7 @@ describe("executeCommand", () => {
   });
 
   it("should return empty string when command produces no output", async () => {
-    mockExecaCommand.mockResolvedValueOnce({ all: "" });
+    mockExeca.mockResolvedValueOnce({ all: "" });
 
     const result = await executeCommand({ command: "git add ." });
 
@@ -131,7 +131,7 @@ describe("executeCommand", () => {
 
   it("should truncate output longer than 10000 characters", async () => {
     const longOutput = "x".repeat(15000);
-    mockExecaCommand.mockResolvedValueOnce({ all: longOutput });
+    mockExeca.mockResolvedValueOnce({ all: longOutput });
 
     const result = await executeCommand({ command: "git log" });
 
@@ -141,7 +141,7 @@ describe("executeCommand", () => {
 
   it("should log command output when debug is enabled", async () => {
     mockConfig.debug = true;
-    mockExecaCommand.mockResolvedValueOnce({ all: "debug output" });
+    mockExeca.mockResolvedValueOnce({ all: "debug output" });
 
     await executeCommand({ command: "git status" });
 
@@ -150,7 +150,7 @@ describe("executeCommand", () => {
 
   it("should log error details when debug is enabled and command fails", async () => {
     mockConfig.debug = true;
-    mockExecaCommand.mockRejectedValueOnce({
+    mockExeca.mockRejectedValueOnce({
       exitCode: 1,
       stderr: "some error",
       message: "failed",
