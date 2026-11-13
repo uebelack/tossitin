@@ -22,6 +22,7 @@
 
 ### CI
 
+- 👷 stage npm releases for 2FA approval
 - 👷 add tag-triggered npm release workflow and git-cliff changelog config
 - 👷 test on Node.js 24 and 26 and update actions
 

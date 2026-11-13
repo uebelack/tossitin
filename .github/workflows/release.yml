@@ -47,10 +47,14 @@ jobs:
           config: cliff.toml
           args: --latest --strip header
 
-      # npm (not pnpm) for OIDC trusted publishing; needs the trusted publisher
-      # configured on npmjs.com, no NPM_TOKEN secret
-      - name: Publish to npm
-        run: npm publish --provenance --access public
+      # npm (not pnpm) for OIDC trusted publishing, no NPM_TOKEN secret. The
+      # trusted publisher on npmjs.com only allows staging: the version goes
+      # live after a maintainer runs `npm stage approve <id>` (2FA).
+      - name: Install npm 12
+        run: npm install -g npm@12
+
+      - name: Stage npm publish
+        run: npm stage publish . --provenance --access public
 
       - name: Create GitHub release
         run: gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file "${{ steps.notes.outputs.changelog }}"
