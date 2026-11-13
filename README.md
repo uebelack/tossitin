@@ -3,7 +3,7 @@
 [![CI](https://github.com/uebelack/tossitin/actions/workflows/ci.yml/badge.svg)](https://github.com/uebelack/tossitin/actions/workflows/ci.yml)
 [![npm version](https://img.shields.io/npm/v/tossitin)](https://www.npmjs.com/package/tossitin)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js >= 22](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org/)
+[![Node.js >= 24](https://img.shields.io/badge/node-%3E%3D24-brightgreen)](https://nodejs.org/)
 [![Coverage Status](https://coveralls.io/repos/github/uebelack/tossitin/badge.svg?branch=main)](https://coveralls.io/github/uebelack/tossitin?branch=main)
 
 AI-powered git workflow tool that analyzes your changes, generates meaningful commit messages, and pushes to your repository — all in one command.
@@ -45,7 +45,7 @@ npm install tossitin
 
 ## Requirements
 
-- Node.js v22 or higher
+- Node.js v24 or higher
 - A git repository with at least one remote configured
 - An LLM backend (Anthropic API key or Ollama)
 
